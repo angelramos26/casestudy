@@ -1,0 +1,14 @@
+# Environment file — contains real credentials, NEVER commit
+.env
+
+# Composer dependencies
+/vendor/
+
+# Uploaded user files
+/uploads/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
