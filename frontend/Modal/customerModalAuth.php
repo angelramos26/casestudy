@@ -37,27 +37,14 @@
         <?php endwhile; ?>
         </tbody>
       </table>
-      <!-- Add utang / pay -->
-      <div class="row g-2">
-        <div class="col-6">
-          <form method="POST" action="../backend/customerAuth.php">
+      <!-- Record Payment -->
+      <form method="POST" action="../backend/customerAuth.php">
         <?php csrf_field(); ?>
-            <input type="hidden" name="customerID" value="<?php echo $row['customerID']; ?>">
-            <div class="mb-2"><label class="form-label small fw-semibold">Add Utang (₱)</label><input type="number" name="amount" step="0.01" min="0.01" class="form-control form-control-sm" required></div>
-            <div class="mb-2"><input type="text" name="notes" placeholder="Notes" class="form-control form-control-sm"></div>
-            <button type="submit" name="addCredit" class="btn btn-danger btn-sm w-100"><i class="bi bi-plus-circle me-1"></i>Add Utang</button>
-          </form>
-        </div>
-        <div class="col-6">
-          <form method="POST" action="../backend/customerAuth.php">
-        <?php csrf_field(); ?>
-            <input type="hidden" name="customerID" value="<?php echo $row['customerID']; ?>">
-            <div class="mb-2"><label class="form-label small fw-semibold">Pay Amount (₱)</label><input type="number" name="amount" step="0.01" min="0.01" max="<?php echo $row['credit_balance']; ?>" class="form-control form-control-sm" required></div>
-            <div class="mb-2"><input type="text" name="notes" placeholder="Notes" class="form-control form-control-sm"></div>
-            <button type="submit" name="payCredit" class="btn btn-success btn-sm w-100"><i class="bi bi-check-circle me-1"></i>Record Payment</button>
-          </form>
-        </div>
-      </div>
+        <input type="hidden" name="customerID" value="<?php echo $row['customerID']; ?>">
+        <div class="mb-2"><label class="form-label small fw-semibold">Pay Amount (₱)</label><input type="number" name="amount" step="0.01" min="0.01" max="<?php echo $row['credit_balance']; ?>" class="form-control form-control-sm" required></div>
+        <div class="mb-2"><input type="text" name="notes" placeholder="Notes" class="form-control form-control-sm"></div>
+        <button type="submit" name="payCredit" class="btn btn-success btn-sm w-100"><i class="bi bi-check-circle me-1"></i>Record Payment</button>
+      </form>
     </div>
   </div></div>
 </div>
@@ -74,7 +61,7 @@
       <div class="modal-body">
         <input type="hidden" name="customerID" value="<?php echo $row['customerID']; ?>">
         <div class="mb-2"><label class="form-label fw-semibold small">Name <span class="text-danger">*</span></label><input type="text" name="customerName" value="<?php echo htmlspecialchars($row['customerName']); ?>" class="form-control" required></div>
-        <div class="mb-2"><label class="form-label fw-semibold small">Contact No</label><input type="text" name="contactNo" value="<?php echo htmlspecialchars($row['contactNo']??''); ?>" class="form-control"></div>
+        <div class="mb-2"><label class="form-label fw-semibold small">Contact No <span class="text-danger">*</span></label><input type="text" name="contactNo" value="<?php echo htmlspecialchars($row['contactNo']??''); ?>" class="form-control" required></div>
         <div class="mb-2"><label class="form-label fw-semibold small">Email</label><input type="email" name="email" value="<?php echo htmlspecialchars($row['email']??''); ?>" class="form-control"></div>
         <div class="mb-2"><label class="form-label fw-semibold small">Address</label><textarea name="address" class="form-control" rows="2"><?php echo htmlspecialchars($row['address']??''); ?></textarea></div>
       </div>

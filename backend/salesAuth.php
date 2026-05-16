@@ -3,10 +3,9 @@ ob_start();
 require_once 'database.php';
 require_once 'pusher-broadcast.php';
 require_once __DIR__ . '/csrf.php';
-session_start();
 csrf_verify(true);
-ob_clean(); // discard any output from includes before we send JSON
-header('Content-Type: application/json');
+ob_end_clean(); // discard ALL buffered output from includes before we send JSON
+header('Content-Type: application/json; charset=utf-8');
 
 if(!isset($_SESSION['userID'])){ echo json_encode(['success'=>false,'message'=>'Not logged in']); exit(); }
 

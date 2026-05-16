@@ -9,166 +9,540 @@ $pageTitle = "Settings – 7Evelyn POS";
 <?php include 'header.php'; ?>
 <?php include 'nav.php'; ?>
 
-<div class="topbar no-print">
-    <h5><i class="bi bi-gear me-2" style="color:var(--ev-purple);"></i>Settings</h5>
-    <div class="ms-auto">
-        <div class="user-badge">
-            <i class="bi bi-person-circle" style="color:var(--ev-purple);"></i>
-            <span><?php echo htmlspecialchars($_SESSION['userName']); ?></span>
-            <span class="role-pill"><?php echo htmlspecialchars($_SESSION['roleName']); ?></span>
-        </div>
-    </div>
-</div>
+<style>
 
-<div class="page-body">
-    <div class="row g-4">
+/* ── Page Layout ───────────────────────────────────────────────────────── */
+
+
+
+.user-badge {
+    display: flex; align-items: center; gap: .55rem;
+    background: var(--mint);
+    border: 1.5px solid var(--mint-dark);
+    border-radius: 50px;
+    padding: .32rem .8rem .32rem .5rem;
+    font-size: .78rem;
+    color: var(--navy);
+    font-weight: 600;
+}
+.user-badge i { color: var(--navy-light); font-size: 1.1rem; }
+.role-pill {
+    background: var(--navy);
+    color: var(--gold);
+    font-size: .68rem;
+    font-weight: 700;
+    padding: .15rem .55rem;
+    border-radius: 50px;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+/* ── Page Body ─────────────────────────────────────────────────────────── */
+.settings-body {
+    padding: 2rem 1.8rem;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+/* ── Section Label ─────────────────────────────────────────────────────── */
+.section-label {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+    margin-top: .25rem;
+}
+.section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+    margin-left: .5rem;
+}
+
+/* ── Settings Card ─────────────────────────────────────────────────────── */
+.s-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    border: 1.5px solid var(--border);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    transition: var(--transition);
+    margin-bottom: 1.4rem;
+}
+.s-card:hover {
+    box-shadow: var(--shadow-md);
+    border-color: #d9d5f0;
+}
+.s-card-header {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    padding: 1rem 1.4rem;
+    border-bottom: 1.5px solid var(--border);
+    background: var(--mint);
+}
+.s-card-header .hdr-icon {
+    width: 36px; height: 36px;
+    background: var(--gold);
+    border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--navy);
+    font-size: 1.05rem;
+    flex-shrink: 0;
+}
+.s-card-header .hdr-title {
+    font-size: .92rem;
+    font-weight: 700;
+    color: var(--navy);
+    letter-spacing: -.01em;
+}
+.s-card-header .hdr-desc {
+    font-size: .75rem;
+    color: var(--text-muted);
+    margin-top: .05rem;
+}
+.s-card-body {
+    padding: 1.5rem 1.4rem;
+}
+
+/* ── Logo Upload Zone ──────────────────────────────────────────────────── */
+.logo-upload-zone {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    padding: 1.1rem 1.3rem;
+    background: var(--mint);
+    border-radius: var(--radius-md);
+    border: 1.5px dashed var(--mint-dark);
+    margin-bottom: 1.2rem;
+    transition: var(--transition);
+}
+.logo-upload-zone:hover {
+    border-color: var(--gold-dark);
+    background: var(--gold-soft);
+}
+.logo-thumb {
+    width: 72px; height: 72px;
+    border-radius: var(--radius-md);
+    border: 2px solid var(--border);
+    background: var(--white);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+.logo-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
+.logo-thumb i { font-size: 1.6rem; color: var(--text-light); }
+.logo-actions { flex: 1; }
+.logo-actions .logo-hint {
+    font-size: .72rem;
+    color: var(--text-muted);
+    margin-top: .5rem;
+}
+
+/* ── Form Controls ─────────────────────────────────────────────────────── */
+.field-group { margin-bottom: 1.1rem; }
+.field-group label {
+    display: block;
+    font-size: .78rem;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: .35rem;
+    letter-spacing: -.005em;
+}
+.field-group .form-control {
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: .58rem .85rem;
+    font-size: .85rem;
+    color: var(--text-main);
+    background: var(--white);
+    transition: var(--transition);
+    box-shadow: none;
+}
+.field-group .form-control:focus {
+    border-color: var(--gold-dark);
+    box-shadow: 0 0 0 3px rgba(249,217,74,.18);
+    outline: none;
+}
+.field-group .field-hint {
+    font-size: .72rem;
+    color: var(--text-muted);
+    margin-top: .3rem;
+}
+
+/* ── Toggle Row ────────────────────────────────────────────────────────── */
+.toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: .8rem 1rem;
+    border-radius: var(--radius-sm);
+    background: var(--mint);
+    border: 1.5px solid var(--mint-dark);
+    margin-bottom: .7rem;
+    gap: 1rem;
+}
+.toggle-row-text .toggle-title {
+    font-size: .83rem;
+    font-weight: 700;
+    color: var(--navy);
+}
+.toggle-row-text .toggle-sub {
+    font-size: .72rem;
+    color: var(--text-muted);
+    margin-top: .05rem;
+}
+.form-check-input[type=checkbox] {
+    width: 2.2em;
+    height: 1.2em;
+    background-color: #ccc;
+    border: none;
+    cursor: pointer;
+    border-radius: 50px;
+    flex-shrink: 0;
+}
+.form-check-input[type=checkbox]:checked {
+    background-color: var(--navy);
+    border-color: var(--navy);
+}
+.form-check-input:focus { box-shadow: 0 0 0 3px rgba(38,35,65,.12); }
+
+/* ── Buttons ───────────────────────────────────────────────────────────── */
+.btn-gold {
+    background: var(--gold);
+    color: var(--navy);
+    border: 1.5px solid var(--gold-dark);
+    border-radius: var(--radius-sm);
+    font-size: .82rem;
+    font-weight: 700;
+    padding: .55rem 1.1rem;
+    transition: var(--transition);
+    display: inline-flex; align-items: center; gap: .4rem;
+    cursor: pointer;
+    letter-spacing: -.01em;
+}
+.btn-gold:hover {
+    background: var(--gold-dark);
+    color: var(--navy);
+    box-shadow: 0 4px 14px rgba(249,217,74,.4);
+    transform: translateY(-1px);
+}
+.btn-gold-outline {
+    background: transparent;
+    color: var(--navy);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: .82rem;
+    font-weight: 600;
+    padding: .55rem 1.1rem;
+    transition: var(--transition);
+    display: inline-flex; align-items: center; gap: .4rem;
+    cursor: pointer;
+}
+.btn-gold-outline:hover {
+    border-color: var(--navy);
+    background: var(--mint);
+    color: var(--navy);
+}
+.btn-danger-outline {
+    background: transparent;
+    color: #d93025;
+    border: 1.5px solid #f4c2bf;
+    border-radius: var(--radius-sm);
+    font-size: .82rem;
+    font-weight: 600;
+    padding: .55rem 1.1rem;
+    transition: var(--transition);
+    display: inline-flex; align-items: center; gap: .4rem;
+    cursor: pointer;
+}
+.btn-danger-outline:hover {
+    background: #fff0ef;
+    border-color: #d93025;
+    color: #d93025;
+    box-shadow: 0 4px 12px rgba(217,48,37,.12);
+}
+.btn-save-full {
+    width: 100%;
+    justify-content: center;
+    margin-top: .5rem;
+}
+
+/* ── System Info Table ─────────────────────────────────────────────────── */
+.sysinfo-table { width: 100%; border-collapse: collapse; }
+.sysinfo-table tr { border-bottom: 1px solid var(--border); }
+.sysinfo-table tr:last-child { border-bottom: none; }
+.sysinfo-table td { padding: .62rem .25rem; font-size: .82rem; vertical-align: middle; }
+.sysinfo-table td:first-child { color: var(--text-muted); width: 130px; font-weight: 500; }
+.sysinfo-table td:last-child { font-weight: 600; color: var(--navy); }
+.status-dot {
+    display: inline-flex; align-items: center; gap: .35rem;
+}
+.status-dot::before {
+    content: '';
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #1ab26b;
+    display: inline-block;
+}
+
+/* ── Danger Zone ───────────────────────────────────────────────────────── */
+.danger-card {
+    background: #fff8f8;
+    border: 1.5px solid #f4c2bf;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+.danger-header {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    padding: .9rem 1.4rem;
+    background: #fff0ef;
+    border-bottom: 1.5px solid #f4c2bf;
+}
+.danger-header .hdr-icon {
+    width: 34px; height: 34px;
+    background: #f4c2bf;
+    border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    color: #d93025; font-size: 1rem;
+}
+.danger-header .hdr-title { font-size: .9rem; font-weight: 700; color: #d93025; }
+.danger-body {
+    padding: 1.2rem 1.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+.danger-desc .danger-title { font-size: .85rem; font-weight: 700; color: var(--navy); }
+.danger-desc .danger-sub { font-size: .75rem; color: var(--text-muted); margin-top: .2rem; }
+
+/* ── Divider ───────────────────────────────────────────────────────────── */
+.settings-divider {
+    border: none;
+    border-top: 1.5px solid var(--border);
+    margin: .5rem 0 1.2rem;
+}
+
+/* ── Two-col grid ──────────────────────────────────────────────────────── */
+.settings-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.4rem;
+}
+@media(max-width:768px){
+    .settings-grid { grid-template-columns: 1fr; }
+    .settings-body { padding: 1.2rem 1rem; }
+}
+
+/* ── File input ────────────────────────────────────────────────────────── */
+input[type="file"].form-control-sm {
+    font-size: .78rem;
+    padding: .3rem .6rem;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--white);
+    color: var(--text-main);
+    cursor: pointer;
+    transition: var(--transition);
+}
+input[type="file"].form-control-sm:focus {
+    border-color: var(--gold-dark);
+    outline: none;
+}
+</style>
+
+<!-- ── Topbar ──────────────────────────────────────────────────────────────── -->
+<?php
+$topbarTitle = 'Settings';
+$topbarIcon  = 'bi-gear-fill';
+$topbarSub   = 'Configure store preferences and system options';
+include 'topbar.php';
+?>
+
+<!-- ── Page Body ──────────────────────────────────────────────────────────── -->
+<div class="settings-body">
+
+    <!-- Row 1: Branding + Receipt & System Info -->
+    <div class="settings-grid">
 
         <!-- Store Branding -->
-        <div class="col-lg-6">
-            <div class="card card-shadow h-100">
-                <div class="card-header d-flex align-items-center gap-2" style="background:var(--ev-gradient);color:#fff;border-radius:14px 14px 0 0;">
-                    <i class="bi bi-shop-window fs-5"></i>
-                    <span class="fw-bold">Store Branding</span>
+        <div>
+            <div class="section-label"><i class="bi bi-palette2"></i> Appearance</div>
+            <div class="s-card">
+                <div class="s-card-header">
+                    <div class="hdr-icon"><i class="bi bi-shop-window"></i></div>
+                    <div>
+                        <div class="hdr-title">Store Branding</div>
+                        <div class="hdr-desc">Logo, name, and tagline</div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <p class="text-muted small mb-3">Customize how your store appears across the POS system. Changes are saved locally on this device.</p>
+                <div class="s-card-body">
 
-                    <!-- Logo Upload -->
-                    <div class="mb-4">
-                        <label class="form-label fw-semibold small">Store Logo</label>
-                        <div class="d-flex align-items-center gap-3 mb-2">
-                            <div id="logoPreviewWrap" style="width:80px;height:80px;border-radius:14px;overflow:hidden;border:2px dashed #ccc;display:flex;align-items:center;justify-content:center;background:#f8f8f8;flex-shrink:0;">
-                                <i class="bi bi-image text-muted fs-4" id="logoPlaceholderIcon"></i>
-                                <img id="logoPreview" src="" alt="Logo" style="width:100%;height:100%;object-fit:cover;display:none;border-radius:12px;">
-                            </div>
-                            <div class="flex-grow-1">
-                                <input type="file" id="logoFileInput" accept="image/*" class="form-control form-control-sm mb-2">
-                                <div class="d-flex gap-2">
-                                    <button class="btn btn-ev btn-sm" onclick="saveLogo()"><i class="bi bi-check-lg me-1"></i>Save Logo</button>
-                                    <button class="btn btn-outline-danger btn-sm" onclick="removeLogo()"><i class="bi bi-trash me-1"></i>Remove</button>
-                                </div>
-                            </div>
+                    <!-- Logo upload -->
+                    <div class="logo-upload-zone">
+                        <div class="logo-thumb" id="logoPreviewWrap">
+                            <i class="bi bi-image" id="logoPlaceholderIcon"></i>
+                            <img id="logoPreview" src="" alt="Logo" style="display:none;">
                         </div>
-                        <div class="text-muted" style="font-size:11px;">Recommended: square image, max 2MB. Shown in sidebar and on receipts.</div>
+                        <div class="logo-actions">
+                            <input type="file" id="logoFileInput" accept="image/*" class="form-control-sm form-control mb-2">
+                            <div style="display:flex;gap:.5rem;">
+                                <button class="btn-gold btn-sm" onclick="saveLogo()"><i class="bi bi-check-lg"></i> Save Logo</button>
+                                <button class="btn-gold-outline btn-sm" onclick="removeLogo()"><i class="bi bi-trash"></i> Remove</button>
+                            </div>
+                            <div class="logo-hint">Square image · max 2 MB · shown on sidebar &amp; receipts</div>
+                        </div>
                     </div>
 
                     <!-- Store Name -->
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold small">Store / Business Name</label>
+                    <div class="field-group">
+                        <label for="storeNameInput">Store / Business Name</label>
                         <input type="text" id="storeNameInput" class="form-control" placeholder="e.g. 7Evelyn Store" maxlength="60">
-                        <div class="form-text">Displayed in the sidebar and on printed receipts.</div>
+                        <div class="field-hint">Shown in the sidebar and on printed receipts.</div>
                     </div>
 
-                    <!-- Store Tagline -->
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold small">Tagline / Address (Receipt)</label>
+                    <!-- Tagline -->
+                    <div class="field-group">
+                        <label for="storeTaglineInput">Tagline / Address</label>
                         <input type="text" id="storeTaglineInput" class="form-control" placeholder="e.g. Brgy. Poblacion, Angat, Bulacan" maxlength="80">
-                        <div class="form-text">Appears below the store name on receipts.</div>
+                        <div class="field-hint">Appears below the store name on receipts.</div>
                     </div>
 
-                    <button class="btn btn-ev w-100" onclick="saveBranding()">
-                        <i class="bi bi-floppy me-1"></i>Save Branding
+                    <button class="btn-gold btn-save-full" onclick="saveBranding()">
+                        <i class="bi bi-floppy"></i> Save Branding
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- Receipt Preferences -->
-        <div class="col-lg-6">
-            <div class="card card-shadow mb-4">
-                <div class="card-header d-flex align-items-center gap-2" style="background:var(--ev-gradient);color:#fff;border-radius:14px 14px 0 0;">
-                    <i class="bi bi-receipt fs-5"></i>
-                    <span class="fw-bold">Receipt Preferences</span>
+        <!-- Right column -->
+        <div>
+            <!-- Receipt Preferences -->
+            <div class="section-label"><i class="bi bi-receipt"></i> Receipts</div>
+            <div class="s-card">
+                <div class="s-card-header">
+                    <div class="hdr-icon"><i class="bi bi-receipt"></i></div>
+                    <div>
+                        <div class="hdr-title">Receipt Preferences</div>
+                        <div class="hdr-desc">Footer message and print options</div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <p class="text-muted small mb-3">Configure what appears on your printed receipts.</p>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold small">Footer Message</label>
+                <div class="s-card-body">
+                    <div class="field-group">
+                        <label for="receiptFooterInput">Footer Message</label>
                         <input type="text" id="receiptFooterInput" class="form-control" placeholder="e.g. Thank you for shopping with us!" maxlength="100">
+                        <div class="field-hint">Printed at the bottom of every receipt.</div>
                     </div>
 
-                    <div class="mb-3">
-                        <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="showTaglineToggle" role="switch">
-                            <label class="form-check-label small fw-semibold" for="showTaglineToggle">Show tagline/address on receipt</label>
+                    <div class="toggle-row">
+                        <div class="toggle-row-text">
+                            <div class="toggle-title">Show tagline on receipt</div>
+                            <div class="toggle-sub">Prints the tagline/address below store name</div>
                         </div>
+                        <input class="form-check-input" type="checkbox" id="showTaglineToggle" role="switch">
                     </div>
 
-                    <div class="mb-3">
-                        <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="showLogoReceiptToggle" role="switch" checked>
-                            <label class="form-check-label small fw-semibold" for="showLogoReceiptToggle">Show logo on receipt</label>
+                    <div class="toggle-row">
+                        <div class="toggle-row-text">
+                            <div class="toggle-title">Show logo on receipt</div>
+                            <div class="toggle-sub">Includes the store logo at the top</div>
                         </div>
+                        <input class="form-check-input" type="checkbox" id="showLogoReceiptToggle" role="switch" checked>
                     </div>
 
-                    <button class="btn btn-ev w-100" onclick="saveReceiptPrefs()">
-                        <i class="bi bi-floppy me-1"></i>Save Receipt Settings
+                    <button class="btn-gold btn-save-full" onclick="saveReceiptPrefs()">
+                        <i class="bi bi-floppy"></i> Save Receipt Settings
                     </button>
                 </div>
             </div>
 
             <!-- System Info -->
-            <div class="card card-shadow">
-                <div class="card-header d-flex align-items-center gap-2" style="background:linear-gradient(135deg,#003d2e,#005e47);color:#fff;border-radius:14px 14px 0 0;">
-                    <i class="bi bi-info-circle fs-5"></i>
-                    <span class="fw-bold">System Information</span>
+            <div class="section-label" style="margin-top:1.4rem;"><i class="bi bi-cpu"></i> System</div>
+            <div class="s-card">
+                <div class="s-card-header">
+                    <div class="hdr-icon" style="background:var(--mint-dark);color:var(--navy-mid);"><i class="bi bi-info-circle"></i></div>
+                    <div>
+                        <div class="hdr-title">System Information</div>
+                        <div class="hdr-desc">Environment and session details</div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <table class="table table-sm mb-0">
+                <div class="s-card-body" style="padding-top:1rem;padding-bottom:1rem;">
+                    <table class="sysinfo-table">
                         <tbody>
-                            <tr><td class="text-muted small">System</td><td class="fw-semibold small">7Evelyn POS</td></tr>
-                            <tr><td class="text-muted small">Logged In As</td><td class="fw-semibold small"><?php echo htmlspecialchars($_SESSION['userName']); ?></td></tr>
-                            <tr><td class="text-muted small">Role</td><td><span class="role-pill"><?php echo htmlspecialchars($_SESSION['roleName']); ?></span></td></tr>
-                            <tr><td class="text-muted small">Server Date</td><td class="fw-semibold small"><?php echo date('F d, Y'); ?></td></tr>
-                            <tr><td class="text-muted small">PHP Version</td><td class="fw-semibold small"><?php echo phpversion(); ?></td></tr>
-                            <tr><td class="text-muted small">Database</td><td class="fw-semibold small">MySQL (connected)</td></tr>
+                            <tr>
+                                <td>System</td>
+                                <td>7Evelyn POS</td>
+                            </tr>
+                            <tr>
+                                <td>Logged in as</td>
+                                <td><?php echo htmlspecialchars($_SESSION['userName']); ?></td>
+                            </tr>
+                            <tr>
+                                <td>Role</td>
+                                <td><span class="role-pill"><?php echo htmlspecialchars($_SESSION['roleName']); ?></span></td>
+                            </tr>
+                            <tr>
+                                <td>Server date</td>
+                                <td><?php echo date('F d, Y'); ?></td>
+                            </tr>
+                            <tr>
+                                <td>PHP version</td>
+                                <td><?php echo phpversion(); ?></td>
+                            </tr>
+                            <tr>
+                                <td>Database</td>
+                                <td><span class="status-dot">MySQL connected</span></td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
-
-        <!-- Danger Zone -->
-        <div class="col-12">
-            <div class="card card-shadow border border-danger">
-                <div class="card-header d-flex align-items-center gap-2 bg-danger text-white" style="border-radius:14px 14px 0 0;">
-                    <i class="bi bi-exclamation-triangle fs-5"></i>
-                    <span class="fw-bold">Danger Zone</span>
-                </div>
-                <div class="card-body">
-                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
-                        <div>
-                            <div class="fw-semibold small">Clear Local Settings</div>
-                            <div class="text-muted" style="font-size:12px;">Removes logo, store name, and all local preferences from this browser. Cannot be undone.</div>
-                        </div>
-                        <button class="btn btn-outline-danger btn-sm" onclick="clearAllSettings()">
-                            <i class="bi bi-trash me-1"></i>Clear All Local Settings
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
     </div>
-</div>
+
+    <!-- Danger Zone -->
+    <div class="section-label" style="margin-top:.6rem;"><i class="bi bi-exclamation-triangle"></i> Danger Zone</div>
+    <div class="danger-card">
+        <div class="danger-header">
+            <div class="hdr-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
+            <div class="hdr-title">Irreversible Actions</div>
+        </div>
+        <div class="danger-body">
+            <div class="danger-desc">
+                <div class="danger-title">Clear Local Settings</div>
+                <div class="danger-sub">Removes logo, store name, and all local preferences from this browser. This cannot be undone.</div>
+            </div>
+            <button class="btn-danger-outline" onclick="clearAllSettings()">
+                <i class="bi bi-trash"></i> Clear All Local Settings
+            </button>
+        </div>
+    </div>
+
+</div><!-- end settings-body -->
 
 <script>
 // ── Load saved settings on page load ──────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function(){
-    // Logo
     const logo = localStorage.getItem('ev_store_logo');
     if(logo) showLogoPreview(logo);
 
-    // Store name
     const name = localStorage.getItem('ev_store_name');
     if(name) document.getElementById('storeNameInput').value = name;
 
-    // Tagline
     const tagline = localStorage.getItem('ev_store_tagline');
     if(tagline) document.getElementById('storeTaglineInput').value = tagline;
 
-    // Receipt prefs
     const footer = localStorage.getItem('ev_receipt_footer');
     if(footer) document.getElementById('receiptFooterInput').value = footer;
 
@@ -204,12 +578,11 @@ function saveLogo(){
         return;
     }
     localStorage.setItem('ev_store_logo', src);
-    // Update sidebar logo immediately
-    const sidebarImg = document.getElementById('sidebarLogoImg');
+    const sidebarImg  = document.getElementById('sidebarLogoImg');
     const sidebarIcon = document.getElementById('sidebarLogoIcon');
     if(sidebarImg){ sidebarImg.src = src; sidebarImg.style.display='block'; }
     if(sidebarIcon){ sidebarIcon.style.display='none'; }
-    Swal.fire({icon:'success',title:'Logo Saved!',text:'Your logo has been saved.',timer:1500,showConfirmButton:false});
+    Swal.fire({icon:'success',title:'Logo Saved!',timer:1500,showConfirmButton:false});
 }
 
 function removeLogo(){
@@ -218,8 +591,7 @@ function removeLogo(){
     document.getElementById('logoPreview').src = '';
     document.getElementById('logoPlaceholderIcon').style.display = '';
     document.getElementById('logoFileInput').value = '';
-    // Reset sidebar logo
-    const sidebarImg = document.getElementById('sidebarLogoImg');
+    const sidebarImg  = document.getElementById('sidebarLogoImg');
     const sidebarIcon = document.getElementById('sidebarLogoIcon');
     if(sidebarImg){ sidebarImg.style.display='none'; }
     if(sidebarIcon){ sidebarIcon.style.display=''; }
@@ -237,7 +609,6 @@ function saveBranding(){
     if(tagline) localStorage.setItem('ev_store_tagline', tagline);
     else localStorage.removeItem('ev_store_tagline');
 
-    // Update sidebar brand name immediately
     const brandEl = document.getElementById('sidebarBrandName');
     if(brandEl) brandEl.textContent = name || '7Evelyn';
 
@@ -266,7 +637,7 @@ function clearAllSettings(){
         title:'Clear all local settings?',
         text:'This will remove your logo, store name, and all preferences from this browser.',
         showCancelButton:true,
-        confirmButtonColor:'#f01b2d',
+        confirmButtonColor:'#d93025',
         confirmButtonText:'Yes, clear all',
         cancelButtonText:'Cancel'
     }).then(r => {

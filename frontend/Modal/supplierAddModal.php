@@ -1,7 +1,6 @@
 <?php
 // supplierAddModal.php
 // The "Add Supplier" modal rendered once outside the data loop.
-// Wrap with role check: <?php if($_SESSION['roleName']==='Admin'): ?> ... <?php endif; ?>
 ?>
 
 <!-- Add Supplier Modal -->

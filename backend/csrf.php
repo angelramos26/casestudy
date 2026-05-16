@@ -19,8 +19,10 @@
  * Token lifetime: per-session, regenerated on login/logout.
  */
 
-// Session must already be started before requiring this file.
-// All backend/*Auth.php files call session_start() before require_once 'csrf.php'.
+// Ensure session is active before any CSRF functions are called.
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 /**
  * Return (and lazily create) the session CSRF token.

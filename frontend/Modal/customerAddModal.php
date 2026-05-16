@@ -1,7 +1,6 @@
 <?php
 // customerAddModal.php
 // The "Add Customer" modal rendered once outside the data loop.
-// Wrap with role check: <?php if($_SESSION['roleName']==='Admin'): ?> ... <?php endif; ?>
 ?>
 
 <!-- Add Customer Modal -->
@@ -15,7 +14,7 @@
       </div>
       <div class="modal-body">
         <div class="mb-2"><label class="form-label fw-semibold small">Name <span class="text-danger">*</span></label><input type="text" name="customerName" class="form-control" required></div>
-        <div class="mb-2"><label class="form-label fw-semibold small">Contact No</label><input type="text" name="contactNo" class="form-control"></div>
+        <div class="mb-2"><label class="form-label fw-semibold small">Contact No <span class="text-danger">*</span></label><input type="text" name="contactNo" class="form-control" required></div>
         <div class="mb-2"><label class="form-label fw-semibold small">Email</label><input type="email" name="email" class="form-control"></div>
         <div class="mb-2"><label class="form-label fw-semibold small">Address</label><textarea name="address" class="form-control" rows="2"></textarea></div>
       </div>

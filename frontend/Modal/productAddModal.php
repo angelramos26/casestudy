@@ -2,7 +2,6 @@
 // productAddModal.php
 // The "Add Product" modal rendered once outside the data loop.
 // Requires: $categories (MySQLi result, will be rewound).
-// Wrap in role check: <?php if($_SESSION['roleName']==='Admin'): ?> ... <?php endif; ?>
 ?>
 
 <!-- Add Product Modal -->

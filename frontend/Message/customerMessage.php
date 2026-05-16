@@ -6,6 +6,7 @@ $alerts = [
     'creditAdded'        => ['success', 'Credit Added',   'Utang recorded successfully.'],
     'creditPaid'         => ['success', 'Paid!',          'Credit payment recorded.'],
     'emailExists'        => ['error',   'Email Exists',   'Email already in use.'],
+    'contactExists'      => ['error',   'Contact Exists', 'Contact No. is already registered to another customer.'],
     'insufficientBalance'=> ['error',   'Insufficient',   'Payment exceeds current balance.'],
     'emptyFields'        => ['warning', 'Required Fields','Please fill in all required fields.'],
 ];

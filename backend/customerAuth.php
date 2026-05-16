@@ -2,7 +2,6 @@
 require_once 'database.php';
 require_once 'pusher-broadcast.php';
 require_once __DIR__ . '/csrf.php';
-session_start();
 csrf_verify();
 if(!isset($_SESSION['userID'])){ header("Location: ../index.php"); exit(); }
 if(!in_array($_SESSION['roleName'], ['Admin','Owner','Cashier'])){ header("Location: ../frontend/dashboard.php"); exit(); }
@@ -14,11 +13,12 @@ if(isset($_POST['customerSave'])){
     $contact = sanitize($_POST['contactNo'] ?? '');
     $email   = sanitize($_POST['email'] ?? '');
     $address = sanitize($_POST['address'] ?? '');
-    if(!$name){ header("Location: ../frontend/customer.php?emptyFields"); exit(); }
+    if(!$name || !$contact){ header("Location: ../frontend/customer.php?emptyFields"); exit(); }
     $stmt = $conn->prepare("CALL AddCustomer(?,?,?,?)");
     $stmt->bind_param("ssss", $name, $contact, $email, $address);
     $stmt->execute();
     $r = $stmt->get_result()->fetch_assoc();
+    if($r['result'] === 'duplicate_contact'){ header("Location: ../frontend/customer.php?contactExists"); exit(); }
     if($r['result'] === 'duplicate_email'){ header("Location: ../frontend/customer.php?emailExists"); exit(); }
     pusherBroadcast('customer-changed', ['action'=>'added','customerName'=>$name,'by'=>$_SESSION['userName']??'']);
     header("Location: ../frontend/customer.php?savedData"); exit();

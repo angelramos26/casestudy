@@ -7,7 +7,7 @@ $host = $env['DB_HOST'] ?? 'localhost';
 $port = $env['DB_PORT'] ?? 3308;
 $user = $env['DB_USER'] ?? 'root';
 $pass = $env['DB_PASS'] ?? '';
-$db   = $env['DB_NAME'] ?? 'evelyn_pos';
+$db   = $env['DB_NAME'] ?? 'sm-pos';
 
 $conn = new mysqli($host, $user, $pass, $db, (int)$port);
 

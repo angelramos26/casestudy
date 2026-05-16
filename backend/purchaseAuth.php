@@ -2,7 +2,6 @@
 require_once 'database.php';
 require_once 'pusher-broadcast.php';
 require_once __DIR__ . '/csrf.php';
-session_start();
 csrf_verify();
 if(!isset($_SESSION['userID'])){ header("Location: ../index.php"); exit(); }
 if(!in_array($_SESSION['roleName'], ['Admin','Owner'])){ header("Location: ../frontend/dashboard.php"); exit(); }

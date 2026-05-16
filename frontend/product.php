@@ -16,10 +16,289 @@ while($row = $productResult->fetch_assoc()) $products[] = $row;
 <?php include 'header.php'; ?>
 <?php include 'nav.php'; ?>
 
-<div class="topbar no-print">
-    <h5><i class="bi bi-box-seam me-2" style="color:var(--ev-purple);"></i>Product Management</h5>
-    <div class="ms-auto"><span class="text-muted small"><?php echo htmlspecialchars($_SESSION['userName']); ?></span></div>
-</div>
+<style>
+/* ── PAGE BODY ───────────────────────────────────────────────── */
+.page-body {
+  background: #f5f4f9;
+  min-height: calc(100vh - 56px);
+  padding: 28px 28px 48px;
+}
+
+/* ── SECTION HEADER ──────────────────────────────────────────── */
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--col-navy);
+  letter-spacing: -.01em;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.section-title .title-dot {
+  width: 10px; height: 10px;
+  background: var(--col-yellow);
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/* ── PRIMARY BUTTON ──────────────────────────────────────────── */
+.btn-add {
+  background: var(--col-yellow);
+  color: var(--col-navy);
+  border: none;
+  font-weight: 700;
+  border-radius: var(--radius-pill);
+  padding: 9px 22px;
+  font-size: .87rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background .18s, transform .14s, box-shadow .18s;
+  box-shadow: 0 3px 12px var(--col-yellow-30);
+}
+.btn-add:hover {
+  background: #f5ce28;
+  color: var(--col-navy);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px var(--col-yellow-30);
+}
+
+/* ── CARD ────────────────────────────────────────────────────── */
+.card-ev {
+  background: #fff;
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  border: none;
+  overflow: hidden;
+}
+
+/* ── TABLE ───────────────────────────────────────────────────── */
+.table-ev {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: .875rem;
+}
+.table-ev thead th {
+  background: var(--col-navy);
+  color: var(--col-yellow);
+  font-weight: 700;
+  letter-spacing: .04em;
+  font-size: .75rem;
+  text-transform: uppercase;
+  padding: 13px 14px;
+  border: none;
+  white-space: nowrap;
+}
+.table-ev thead th:first-child { border-radius: 0; }
+.table-ev tbody tr {
+  transition: background .15s;
+}
+.table-ev tbody tr:nth-child(even) { background: var(--col-mint); }
+.table-ev tbody tr:hover { background: var(--col-yellow-30); }
+.table-ev tbody td {
+  padding: 11px 14px;
+  border-bottom: 1px solid rgba(38,35,65,.06);
+  vertical-align: middle;
+  color: var(--col-navy);
+}
+
+/* Product image thumbnail */
+.product-thumb {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 2px solid var(--col-mint);
+  background: #f5f4f9;
+}
+.product-thumb-placeholder {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  background: var(--col-mint);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--col-muted);
+  font-size: .95rem;
+  border: 2px solid #e2f0f0;
+}
+
+/* ── BADGES ──────────────────────────────────────────────────── */
+.badge-ev {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.badge-active   { background: rgba(45,190,138,.14); color: var(--col-success); }
+.badge-inactive { background: rgba(224,82,82,.12);  color: var(--col-danger);  }
+.badge-low      { background: rgba(240,168,71,.15); color: var(--col-warning); }
+
+/* ── ACTION BUTTONS ──────────────────────────────────────────── */
+.btn-act {
+  width: 30px; height: 30px;
+  border-radius: 8px;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .8rem;
+  cursor: pointer;
+  transition: transform .13s, opacity .13s;
+}
+.btn-act:hover { transform: scale(1.12); opacity: .85; }
+.btn-act-edit   { background: var(--col-navy-10); color: var(--col-navy); }
+.btn-act-del    { background: rgba(224,82,82,.12); color: var(--col-danger); }
+.btn-act-ok     { background: rgba(45,190,138,.12); color: var(--col-success); }
+
+/* ── MODAL ───────────────────────────────────────────────────── */
+.modal-content {
+  border: none;
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  box-shadow: 0 24px 64px rgba(38,35,65,.22);
+}
+.modal-header-ev {
+  background: var(--col-navy);
+  color: #fff;
+  padding: 18px 24px;
+}
+.modal-header-ev .modal-title {
+  font-weight: 800;
+  font-size: .97rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.modal-header-ev .modal-title i { color: var(--col-yellow); }
+.modal-header-danger  { background: var(--col-danger); }
+.modal-header-success { background: var(--col-success); }
+.modal-body { padding: 24px; }
+.modal-footer { padding: 14px 24px; border-top: 1px solid var(--col-col-mint); background: #fafafa; }
+
+.form-label {
+  font-size: .78rem;
+  font-weight: 700;
+  color: var(--col-navy);
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+.form-control, .form-select {
+  border-radius: 10px;
+  border: 1.5px solid #ddd;
+  font-size: .875rem;
+  padding: 9px 13px;
+  color: var(--col-navy);
+  transition: border-color .15s, box-shadow .15s;
+}
+.form-control:focus, .form-select:focus {
+  border-color: var(--col-yellow);
+  box-shadow: 0 0 0 3px var(--col-yellow-30);
+  outline: none;
+}
+
+/* ── DATATABLE overrides ─────────────────────────────────────── */
+div.dataTables_wrapper .dataTables_filter input {
+  border-radius: 10px;
+  border: 1.5px solid #ddd;
+  padding: 7px 13px;
+  font-size: .85rem;
+  margin-left: 6px;
+}
+div.dataTables_wrapper .dataTables_length select {
+  border-radius: 8px;
+  border: 1.5px solid #ddd;
+  padding: 5px 10px;
+  font-size: .85rem;
+}
+div.dataTables_wrapper .dataTables_info { font-size: .8rem; color: var(--col-muted); }
+div.dataTables_wrapper .dataTables_paginate .paginate_button {
+  border-radius: 8px !important;
+  font-size: .82rem !important;
+}
+div.dataTables_wrapper .dataTables_paginate .paginate_button.current,
+div.dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+  background: var(--col-navy) !important;
+  color: var(--col-yellow) !important;
+  border-color: var(--col-navy) !important;
+}
+div.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+  background: var(--col-yellow-30) !important;
+  color: var(--col-navy) !important;
+  border-color: transparent !important;
+}
+
+/* expiry colors */
+.expiry-expired { color: var(--col-danger); font-weight: 700; }
+.expiry-soon    { color: var(--col-warning); font-weight: 700; }
+
+/* btn-secondary override in modals */
+.btn-secondary {
+  background: var(--col-navy-10);
+  color: var(--col-navy);
+  border: none;
+  border-radius: var(--radius-pill);
+  font-weight: 600;
+  font-size: .87rem;
+  padding: 9px 20px;
+}
+.btn-secondary:hover { background: rgba(38,35,65,.14); color: var(--col-navy); }
+.btn-danger-ev {
+  background: var(--col-danger);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-pill);
+  font-weight: 700;
+  font-size: .87rem;
+  padding: 9px 22px;
+}
+.btn-success-ev {
+  background: var(--col-success);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-pill);
+  font-weight: 700;
+  font-size: .87rem;
+  padding: 9px 22px;
+}
+
+/* image preview in edit */
+.img-current-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--col-mint);
+  border-radius: 10px;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+}
+.img-new-preview {
+  background: var(--col-mint);
+  border-radius: 10px;
+  padding: 8px 12px;
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+</style>
+
+<?php
+$topbarTitle = 'Product Management';
+$topbarIcon  = 'bi-box-seam';
+$topbarSub   = 'Add, edit, and manage store products';
+include 'topbar.php';
+?>
 
 <?php
 $alerts=['savedData'=>['success','Product Added','Product has been added successfully.'],'updatedProduct'=>['success','Product Updated','Product information updated.'],'productDeleted'=>['success','Deactivated','Product set to inactive.'],'productReactivated'=>['success','Reactivated','Product is now active.'],'barcodeExists'=>['error','Barcode Exists','This barcode is already registered.'],'emptyFields'=>['warning','Required Fields','Please fill in all required fields.']];
@@ -27,58 +306,75 @@ foreach($alerts as $k=>[$i,$t,$tx]) if(isset($_GET[$k])) echo "<script>Swal.fire
 ?>
 
 <div class="page-body">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5 class="fw-bold mb-0" style="color:#004a38;">Products</h5>
+    <div class="section-header">
+        <div class="section-title">
+            <span class="title-dot"></span>
+            Products
+        </div>
         <?php if($_SESSION['roleName']==='Admin'): ?>
-        <button class="btn btn-ev" data-bs-toggle="modal" data-bs-target="#addProductModal">
-            <i class="bi bi-plus-circle me-1"></i>Add Product
+        <button class="btn btn-add" data-bs-toggle="modal" data-bs-target="#addProductModal">
+            <i class="bi bi-plus-circle"></i>Add Product
         </button>
         <?php endif; ?>
     </div>
 
-    <div class="card card-shadow">
-        <div class="card-body">
-            <table id="productTable" class="table table-bordered table-striped text-center">
-                <thead style="background:var(--ev-gradient);color:#fff;">
-                    <tr><th>Image</th><th>Barcode</th><th>Product Name</th><th>Category</th><th>Price</th><th>Cost</th><th>Stock</th><th>Reorder</th><th>Expiry</th><th>Status</th><th width="120">Action</th></tr>
+    <div class="card-ev">
+        <div class="p-3">
+            <table id="productTable" class="table-ev" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>Barcode</th>
+                        <th>Product Name</th>
+                        <th>Category</th>
+                        <th>Price</th>
+                        <th>Cost</th>
+                        <th>Stock</th>
+                        <th>Reorder</th>
+                        <th>Expiry</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
                 </thead>
                 <tbody>
                 <?php foreach($products as $row):
-                    $stockClass  = $row['stock_quantity'] == 0 ? 'badge-inactive' : ($row['stock_quantity'] <= $row['reorder_level'] ? 'badge-low' : 'badge-active');
+                    $stockClass  = $row['stock_quantity'] == 0 ? 'badge-ev badge-inactive' : ($row['stock_quantity'] <= $row['reorder_level'] ? 'badge-ev badge-low' : 'badge-ev badge-active');
                     $expiryClass = '';
                     if($row['expiry_date']){
                         $daysLeft = (strtotime($row['expiry_date']) - time()) / 86400;
-                        if($daysLeft < 0) $expiryClass = 'text-danger fw-bold';
-                        elseif($daysLeft <= 30) $expiryClass = 'text-warning fw-bold';
+                        if($daysLeft < 0) $expiryClass = 'expiry-expired';
+                        elseif($daysLeft <= 30) $expiryClass = 'expiry-soon';
                     }
                 ?>
                 <tr>
-                    <td>
+                    <td style="text-align:center;">
                         <?php if(!empty($row['product_image'])): ?>
-                        <img src="../<?php echo htmlspecialchars($row['product_image']); ?>" alt="" style="width:38px;height:38px;object-fit:cover;border-radius:7px;border:1px solid #b3ddd2;">
+                        <img src="../<?php echo htmlspecialchars($row['product_image']); ?>" alt="" class="product-thumb">
                         <?php else: ?>
-                        <span style="display:inline-flex;width:38px;height:38px;border-radius:7px;background:#f0ede8;align-items:center;justify-content:center;"><i class="bi bi-image" style="color:#bbb;font-size:1rem;"></i></span>
+                        <span class="product-thumb-placeholder"><i class="bi bi-image"></i></span>
                         <?php endif; ?>
                     </td>
-                    <td><small><?php echo htmlspecialchars($row['barcode']??'—'); ?></small></td>
-                    <td class="text-start fw-semibold"><?php echo htmlspecialchars($row['productName']); ?></td>
-                    <td><?php echo htmlspecialchars($row['categoryName']); ?></td>
-                    <td>₱<?php echo number_format($row['price'],2); ?></td>
-                    <td>₱<?php echo number_format($row['cost'],2); ?></td>
-                    <td><span class="<?php echo $stockClass; ?>"><?php echo $row['stock_quantity']; ?></span></td>
-                    <td><?php echo $row['reorder_level']; ?></td>
+                    <td><small style="color:var(--col-muted);font-family:monospace;"><?php echo htmlspecialchars($row['barcode']??'—'); ?></small></td>
+                    <td style="font-weight:700;"><?php echo htmlspecialchars($row['productName']); ?></td>
+                    <td style="color:var(--col-muted);"><?php echo htmlspecialchars($row['categoryName']); ?></td>
+                    <td style="font-weight:600;">₱<?php echo number_format($row['price'],2); ?></td>
+                    <td style="color:var(--col-muted);">₱<?php echo number_format($row['cost'],2); ?></td>
+                    <td style="text-align:center;"><span class="<?php echo $stockClass; ?>"><?php echo $row['stock_quantity']; ?></span></td>
+                    <td style="text-align:center;color:var(--col-muted);"><?php echo $row['reorder_level']; ?></td>
                     <td class="<?php echo $expiryClass; ?>"><?php echo $row['expiry_date'] ? date('M d, Y',strtotime($row['expiry_date'])) : '—'; ?></td>
-                    <td><span class="<?php echo $row['status']==='Active'?'badge-active':'badge-inactive'; ?>"><?php echo $row['status']; ?></span></td>
-                    <td>
+                    <td style="text-align:center;"><span class="badge-ev <?php echo $row['status']==='Active'?'badge-active':'badge-inactive'; ?>"><?php echo $row['status']; ?></span></td>
+                    <td style="text-align:center;">
                         <?php if($_SESSION['roleName']==='Admin'): ?>
-                        <button class="btn btn-sm btn-outline-primary" onclick="openEditProduct(<?php echo $row['productID']; ?>)" title="Edit"><i class="bi bi-pencil"></i></button>
+                        <div style="display:flex;gap:5px;justify-content:center;">
+                        <button class="btn-act btn-act-edit" onclick="openEditProduct(<?php echo $row['productID']; ?>)" title="Edit"><i class="bi bi-pencil"></i></button>
                         <?php if($row['status']==='Active'): ?>
-                        <button class="btn btn-sm btn-outline-danger" onclick="openDeactivateProduct(<?php echo $row['productID']; ?>, '<?php echo addslashes($row['productName']); ?>')" title="Deactivate"><i class="bi bi-x-circle"></i></button>
+                        <button class="btn-act btn-act-del" onclick="openDeactivateProduct(<?php echo $row['productID']; ?>, '<?php echo addslashes($row['productName']); ?>')" title="Deactivate"><i class="bi bi-x-circle"></i></button>
                         <?php else: ?>
-                        <button class="btn btn-sm btn-outline-success" onclick="openReactivateProduct(<?php echo $row['productID']; ?>, '<?php echo addslashes($row['productName']); ?>')" title="Reactivate"><i class="bi bi-arrow-clockwise"></i></button>
+                        <button class="btn-act btn-act-ok" onclick="openReactivateProduct(<?php echo $row['productID']; ?>, '<?php echo addslashes($row['productName']); ?>')" title="Reactivate"><i class="bi bi-arrow-clockwise"></i></button>
                         <?php endif; ?>
+                        </div>
                         <?php else: ?>
-                        <span class="text-muted small">View only</span>
+                        <span style="font-size:.75rem;color:var(--col-muted);">View only</span>
                         <?php endif; ?>
                     </td>
                 </tr>
@@ -89,7 +385,7 @@ foreach($alerts as $k=>[$i,$t,$tx]) if(isset($_GET[$k])) echo "<script>Swal.fire
     </div>
 </div>
 
-<!-- ==================== SHARED MODALS (outside table) ==================== -->
+<!-- ==================== SHARED MODALS ==================== -->
 
 <?php if($_SESSION['roleName']==='Admin'): ?>
 
@@ -97,9 +393,9 @@ foreach($alerts as $k=>[$i,$t,$tx]) if(isset($_GET[$k])) echo "<script>Swal.fire
 <div class="modal fade" id="addProductModal" tabindex="-1">
   <div class="modal-dialog modal-lg"><div class="modal-content">
     <form method="POST" action="../backend/productAuth.php">
-            <?php csrf_field(); ?>
-      <div class="modal-header" style="background:var(--ev-gradient);color:#fff;">
-        <h5 class="modal-title"><i class="bi bi-plus-circle me-1"></i>Add New Product</h5>
+      <?php csrf_field(); ?>
+      <div class="modal-header modal-header-ev">
+        <h5 class="modal-title"><i class="bi bi-plus-circle"></i>Add New Product</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
@@ -127,19 +423,19 @@ foreach($alerts as $k=>[$i,$t,$tx]) if(isset($_GET[$k])) echo "<script>Swal.fire
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="submit" name="productSave" class="btn btn-ev">Save Product</button>
+        <button type="submit" name="productSave" class="btn btn-add">Save Product</button>
       </div>
     </form>
   </div></div>
 </div>
 
-<!-- Edit Product Modal (single shared) -->
+<!-- Edit Product Modal -->
 <div class="modal fade" id="editProductModal" tabindex="-1">
   <div class="modal-dialog modal-lg"><div class="modal-content">
     <form method="POST" action="../backend/productAuth.php" enctype="multipart/form-data">
-            <?php csrf_field(); ?>
-      <div class="modal-header" style="background:var(--ev-gradient);color:#fff;">
-        <h5 class="modal-title">Edit Product</h5>
+      <?php csrf_field(); ?>
+      <div class="modal-header modal-header-ev">
+        <h5 class="modal-title"><i class="bi bi-pencil-square"></i>Edit Product</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
@@ -165,66 +461,66 @@ foreach($alerts as $k=>[$i,$t,$tx]) if(isset($_GET[$k])) echo "<script>Swal.fire
             </select>
           </div>
           <div class="col-12">
-            <label class="form-label">Product Image <small class="text-muted">(leave blank to keep current, max 2MB)</small></label>
-            <div id="editCurrentImgWrap" class="mb-2 align-items-center gap-2" style="display:none;">
-              <img id="editCurrentImg" src="" alt="Current" style="height:60px;width:60px;object-fit:cover;border-radius:8px;border:1.5px solid #b3ddd2;">
-              <small class="text-muted">Current image</small>
+            <label class="form-label">Product Image <small style="font-weight:400;text-transform:none;color:var(--col-muted);">(leave blank to keep current, max 2MB)</small></label>
+            <div id="editCurrentImgWrap" class="img-current-wrap" style="display:none;">
+              <img id="editCurrentImg" src="" alt="Current" class="product-thumb">
+              <small style="color:var(--col-muted);">Current image</small>
             </div>
             <input type="file" name="product_image" id="editProductImage" class="form-control" accept="image/*" onchange="previewEditModalImage(this)">
-            <div id="editImgPreviewWrap" class="mt-2" style="display:none;">
-              <img id="editImgPreviewImg" src="" alt="New preview" style="max-height:80px;max-width:160px;border-radius:8px;border:1.5px solid #c3b1e1;object-fit:cover;">
-              <small class="ms-2 text-muted">New image preview</small>
+            <div id="editImgPreviewWrap" class="img-new-preview" style="display:none;">
+              <img id="editImgPreviewImg" src="" alt="New preview" class="product-thumb">
+              <small style="color:var(--col-muted);">New image preview</small>
             </div>
           </div>
         </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="submit" name="productUpdate" class="btn btn-ev">Update Product</button>
+        <button type="submit" name="productUpdate" class="btn btn-add">Update Product</button>
       </div>
     </form>
   </div></div>
 </div>
 
-<!-- Deactivate Modal (single shared) -->
+<!-- Deactivate Modal -->
 <div class="modal fade" id="deactivateProductModal" tabindex="-1">
   <div class="modal-dialog"><div class="modal-content">
     <form method="POST" action="../backend/productAuth.php">
-            <?php csrf_field(); ?>
-      <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title">Deactivate Product</h5>
+      <?php csrf_field(); ?>
+      <div class="modal-header modal-header-danger text-white">
+        <h5 class="modal-title" style="font-weight:800;font-size:.97rem;"><i class="bi bi-x-circle me-2"></i>Deactivate Product</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
         <input type="hidden" name="productID" id="deactivateProductID">
-        <p>Deactivate <strong id="deactivateProductName"></strong>?</p>
-        <p class="text-muted small">It will be hidden from POS and marked as Inactive.</p>
+        <p style="color:var(--col-navy);margin-bottom:6px;">Deactivate <strong id="deactivateProductName"></strong>?</p>
+        <p style="color:var(--col-muted);font-size:.85rem;margin:0;">It will be hidden from POS and marked as Inactive.</p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="submit" name="productDelete" class="btn btn-danger">Deactivate</button>
+        <button type="submit" name="productDelete" class="btn btn-danger-ev">Deactivate</button>
       </div>
     </form>
   </div></div>
 </div>
 
-<!-- Reactivate Modal (single shared) -->
+<!-- Reactivate Modal -->
 <div class="modal fade" id="reactivateProductModal" tabindex="-1">
   <div class="modal-dialog"><div class="modal-content">
     <form method="POST" action="../backend/productAuth.php">
-            <?php csrf_field(); ?>
-      <div class="modal-header bg-success text-white">
-        <h5 class="modal-title"><i class="bi bi-arrow-clockwise me-1"></i>Reactivate Product</h5>
+      <?php csrf_field(); ?>
+      <div class="modal-header modal-header-success text-white">
+        <h5 class="modal-title" style="font-weight:800;font-size:.97rem;"><i class="bi bi-arrow-clockwise me-2"></i>Reactivate Product</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
         <input type="hidden" name="productID" id="reactivateProductID">
-        <p>Reactivate <strong id="reactivateProductName"></strong>?</p>
-        <p class="text-muted small">Product will be marked as Active and will appear in POS.</p>
+        <p style="color:var(--col-navy);margin-bottom:6px;">Reactivate <strong id="reactivateProductName"></strong>?</p>
+        <p style="color:var(--col-muted);font-size:.85rem;margin:0;">Product will be marked as Active and will appear in POS.</p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="submit" name="productReactivate" class="btn btn-success">Reactivate</button>
+        <button type="submit" name="productReactivate" class="btn btn-success-ev">Reactivate</button>
       </div>
     </form>
   </div></div>
@@ -253,7 +549,16 @@ const productData = <?php
     echo json_encode($jsProds);
 ?>;
 
-$(document).ready(function(){ $('#productTable').DataTable({pageLength:25}); });
+$(document).ready(function(){
+    $('#productTable').DataTable({
+        pageLength: 25,
+        language: {
+            search: '',
+            searchPlaceholder: 'Search products…',
+        },
+        columnDefs: [{ orderable: false, targets: [0, 10] }]
+    });
+});
 
 function openEditProduct(id){
     const p = productData[id];
@@ -266,10 +571,8 @@ function openEditProduct(id){
     document.getElementById('editReorder').value      = p.reorder_level;
     document.getElementById('editExpiry').value       = p.expiry_date;
     document.getElementById('editStatus').value       = p.status;
-    // Reset image field
     document.getElementById('editProductImage').value = '';
     document.getElementById('editImgPreviewWrap').style.display = 'none';
-    // Show current image if exists
     const imgWrap = document.getElementById('editCurrentImgWrap');
     const imgEl   = document.getElementById('editCurrentImg');
     if(p.product_image){
@@ -287,7 +590,7 @@ function previewEditModalImage(input){
     var img  = document.getElementById('editImgPreviewImg');
     if(input.files && input.files[0]){
         var reader = new FileReader();
-        reader.onload = function(e){ img.src = e.target.result; wrap.style.display='block'; }
+        reader.onload = function(e){ img.src = e.target.result; wrap.style.display='flex'; }
         reader.readAsDataURL(input.files[0]);
     } else { wrap.style.display='none'; }
 }
@@ -306,12 +609,11 @@ function openReactivateProduct(id, name){
 </script>
 </div></div>
 
-<!-- ── Pusher Real-time ───────────────────────────────────────────────────── -->
+<!-- ── Pusher Real-time ───────────────────────────────────── -->
 <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
 <script>
     const PUSHER_KEY     = '<?php echo defined("PUSHER_APP_KEY")     ? PUSHER_APP_KEY     : ""; ?>';
     const PUSHER_CLUSTER = '<?php echo defined("PUSHER_APP_CLUSTER") ? PUSHER_APP_CLUSTER : ""; ?>';
 </script>
 <script src="pusher-content/realtime.js"></script>
-<!-- ─────────────────────────────────────────────────────────────────────── -->
 </body></html>

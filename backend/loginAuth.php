@@ -1,7 +1,6 @@
 <?php
 require_once 'database.php';
 require_once __DIR__ . '/csrf.php';
-session_start();
 
 if(isset($_POST['loginAuth'])){
     csrf_verify(); // validate token only on actual form submission

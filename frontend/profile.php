@@ -16,14 +16,310 @@ $fullName = trim("{$u['givenName']} {$u['midName']} {$u['surName']} {$u['extName
 <?php include 'header.php'; ?>
 <?php include 'nav.php'; ?>
 
-<div class="topbar no-print">
-    <h5><i class="bi bi-person-circle me-2" style="color:var(--ev-purple);"></i>My Profile</h5>
-    <div class="ms-auto"><div class="user-badge">
-        <i class="bi bi-person-circle" style="color:var(--ev-purple);"></i>
-        <span><?php echo htmlspecialchars($_SESSION['userName']); ?></span>
-        <span class="role-pill"><?php echo htmlspecialchars($_SESSION['roleName']); ?></span>
-    </div></div>
-</div>
+<style>
+/* ── Profile Page Variables ─────────────────────────────────────────────── */
+.user-badge {
+    display: flex; align-items: center; gap: .55rem;
+    background: var(--mint);
+    border: 1.5px solid var(--mint-dark);
+    border-radius: 50px;
+    padding: .32rem .8rem .32rem .5rem;
+    font-size: .78rem; color: var(--navy); font-weight: 600;
+}
+.user-badge i { color: var(--navy-light); font-size: 1.1rem; }
+.role-pill {
+    background: var(--navy); color: var(--gold);
+    font-size: .68rem; font-weight: 700;
+    padding: .15rem .55rem; border-radius: 50px;
+    letter-spacing: .04em; text-transform: uppercase;
+}
+
+/* ── Body ───────────────────────────────────────────────────────────────── */
+.profile-body {
+    padding: 2rem 1.8rem;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+/* ── Hero Banner ────────────────────────────────────────────────────────── */
+.profile-hero {
+    background: var(--navy);
+    border-radius: var(--radius-lg);
+    padding: 2rem 2.2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.8rem;
+    margin-bottom: 1.8rem;
+    position: relative;
+    overflow: hidden;
+}
+.profile-hero::before {
+    content: '';
+    position: absolute; right: -60px; top: -60px;
+    width: 260px; height: 260px;
+    border-radius: 50%;
+    background: rgba(249,217,74,.07);
+    pointer-events: none;
+}
+.profile-hero::after {
+    content: '';
+    position: absolute; right: 80px; bottom: -80px;
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    background: rgba(231,245,245,.04);
+    pointer-events: none;
+}
+
+/* Avatar */
+.avatar-wrap {
+    position: relative; display: inline-block; flex-shrink: 0;
+}
+.avatar-img {
+    width: 96px; height: 96px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--gold);
+    box-shadow: 0 0 0 4px rgba(249,217,74,.2);
+    display: block;
+}
+.avatar-placeholder {
+    width: 96px; height: 96px;
+    border-radius: 50%;
+    background: var(--navy-mid);
+    border: 3px solid var(--gold);
+    box-shadow: 0 0 0 4px rgba(249,217,74,.2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.4rem; color: var(--gold);
+}
+.avatar-upload-overlay {
+    position: absolute; bottom: 2px; right: 2px;
+    width: 26px; height: 26px;
+    background: var(--gold);
+    color: var(--navy);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .75rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,.2);
+    cursor: pointer;
+    pointer-events: none;
+}
+.avatar-file-input {
+    position: absolute; inset: 0;
+    opacity: 0; cursor: pointer; width: 100%; height: 100%;
+}
+
+/* Hero Info */
+.hero-info { flex: 1; min-width: 0; }
+.hero-name {
+    font-size: 1.4rem; font-weight: 800;
+    color: var(--white); letter-spacing: -.02em;
+    margin: 0 0 .4rem;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.hero-role-badge {
+    display: inline-flex; align-items: center; gap: .35rem;
+    background: rgba(249,217,74,.15);
+    border: 1px solid rgba(249,217,74,.3);
+    color: var(--gold);
+    font-size: .75rem; font-weight: 700;
+    padding: .25rem .75rem;
+    border-radius: 50px;
+    margin-bottom: .45rem;
+}
+.hero-role-desc {
+    font-size: .78rem; color: rgba(255,255,255,.55);
+    margin-bottom: .5rem;
+}
+.hero-meta {
+    display: flex; align-items: center; gap: 1.2rem;
+    flex-wrap: wrap;
+}
+.hero-meta-item {
+    display: flex; align-items: center; gap: .35rem;
+    font-size: .78rem; color: rgba(255,255,255,.6);
+}
+.hero-meta-item i { color: var(--gold); font-size: .85rem; }
+
+/* ── Section label ──────────────────────────────────────────────────────── */
+.section-label {
+    display: flex; align-items: center; gap: .5rem;
+    font-size: .72rem; font-weight: 700;
+    letter-spacing: .1em; text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+}
+.section-label::after {
+    content: ''; flex: 1; height: 1px;
+    background: var(--border); margin-left: .5rem;
+}
+
+/* ── Cards ──────────────────────────────────────────────────────────────── */
+.p-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    border: 1.5px solid var(--border);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    transition: var(--transition);
+    margin-bottom: 1.4rem;
+}
+.p-card:hover { box-shadow: var(--shadow-md); border-color: #d9d5f0; }
+.p-card-header {
+    display: flex; align-items: center; gap: .7rem;
+    padding: 1rem 1.4rem;
+    border-bottom: 1.5px solid var(--border);
+    background: var(--mint);
+}
+.p-card-header .hdr-icon {
+    width: 36px; height: 36px;
+    background: var(--gold);
+    border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--navy); font-size: 1.05rem; flex-shrink: 0;
+}
+.p-card-header .hdr-title { font-size: .92rem; font-weight: 700; color: var(--navy); }
+.p-card-header .hdr-desc { font-size: .74rem; color: var(--text-muted); margin-top: .04rem; }
+.p-card-body { padding: 1.5rem 1.4rem; }
+
+/* ── Form Fields ────────────────────────────────────────────────────────── */
+.field-group { margin-bottom: 1rem; }
+.field-group label {
+    display: block; font-size: .78rem; font-weight: 700;
+    color: var(--navy); margin-bottom: .32rem;
+}
+.field-group label .req { color: #d93025; }
+.field-group .form-control,
+.field-group .form-select {
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: .56rem .82rem;
+    font-size: .84rem;
+    color: var(--text-main);
+    background: var(--white);
+    transition: var(--transition);
+    box-shadow: none;
+}
+.field-group .form-control:focus,
+.field-group .form-select:focus {
+    border-color: var(--gold-dark);
+    box-shadow: 0 0 0 3px rgba(249,217,74,.18);
+    outline: none;
+}
+.field-group .form-control:disabled,
+.field-group .form-control[disabled] {
+    background: var(--mint);
+    color: var(--text-muted);
+    cursor: not-allowed;
+}
+.field-group .field-hint { font-size: .72rem; color: var(--text-muted); margin-top: .28rem; }
+.field-row { display: grid; gap: 1rem; }
+.field-row-2 { grid-template-columns: 1fr 1fr; }
+.field-row-3 { grid-template-columns: 1fr 1fr 1fr; }
+.field-row-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+@media(max-width:600px){
+    .field-row-2,.field-row-3,.field-row-4{ grid-template-columns:1fr; }
+}
+
+/* ── Buttons ────────────────────────────────────────────────────────────── */
+.btn-gold {
+    background: var(--gold); color: var(--navy);
+    border: 1.5px solid var(--gold-dark);
+    border-radius: var(--radius-sm);
+    font-size: .83rem; font-weight: 700;
+    padding: .58rem 1.3rem;
+    transition: var(--transition);
+    display: inline-flex; align-items: center; gap: .4rem;
+    cursor: pointer; letter-spacing: -.01em;
+}
+.btn-gold:hover {
+    background: var(--gold-dark); color: var(--navy);
+    box-shadow: 0 4px 14px rgba(249,217,74,.38);
+    transform: translateY(-1px);
+}
+.btn-navy {
+    background: var(--navy); color: var(--gold);
+    border: 1.5px solid var(--navy-mid);
+    border-radius: var(--radius-sm);
+    font-size: .83rem; font-weight: 700;
+    padding: .58rem 1.3rem;
+    transition: var(--transition);
+    display: inline-flex; align-items: center; gap: .4rem;
+    cursor: pointer; width: 100%; justify-content: center;
+}
+.btn-navy:hover {
+    background: var(--navy-mid); color: var(--gold);
+    box-shadow: 0 4px 14px rgba(38,35,65,.22);
+    transform: translateY(-1px);
+}
+
+/* ── Role & Access Card ─────────────────────────────────────────────────── */
+.role-banner {
+    display: flex; align-items: center; gap: 1rem;
+    background: var(--navy);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.2rem;
+    margin-bottom: 1.1rem;
+}
+.role-banner-icon {
+    width: 44px; height: 44px;
+    background: rgba(249,217,74,.15);
+    border: 1.5px solid rgba(249,217,74,.3);
+    border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem; color: var(--gold); flex-shrink: 0;
+}
+.role-banner-title { font-weight: 700; color: var(--white); font-size: .9rem; }
+.role-banner-desc  { font-size: .74rem; color: rgba(255,255,255,.55); margin-top: .1rem; }
+
+.info-table { width: 100%; border-collapse: collapse; }
+.info-table tr { border-bottom: 1px solid var(--border); }
+.info-table tr:last-child { border-bottom: none; }
+.info-table td { padding: .6rem .15rem; font-size: .82rem; vertical-align: middle; }
+.info-table td:first-child { color: var(--text-muted); width: 110px; font-weight: 500; }
+.info-table td:last-child { font-weight: 600; color: var(--navy); }
+.status-active {
+    display: inline-flex; align-items: center; gap: .35rem;
+    background: #e6f9f0; color: #1a7a4a;
+    font-size: .72rem; font-weight: 700;
+    padding: .18rem .6rem; border-radius: 50px;
+}
+.status-active::before {
+    content: ''; width: 6px; height: 6px;
+    border-radius: 50%; background: #1ab26b;
+}
+
+/* ── Password fields ────────────────────────────────────────────────────── */
+.pw-input-wrap { position: relative; }
+.pw-input-wrap .form-control { padding-right: 2.6rem; }
+.pw-toggle {
+    position: absolute; right: .75rem; top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-light); cursor: pointer; font-size: .95rem;
+    background: none; border: none; padding: 0;
+    transition: color .15s;
+}
+.pw-toggle:hover { color: var(--navy); }
+
+/* ── Grid layout ────────────────────────────────────────────────────────── */
+.profile-grid {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 1.4rem;
+    align-items: start;
+}
+@media(max-width:900px){
+    .profile-grid { grid-template-columns: 1fr; }
+    .profile-body { padding: 1.2rem 1rem; }
+}
+</style>
+
+<!-- ── Topbar ─────────────────────────────────────────────────────────────── -->
+<?php
+$topbarTitle = 'My Profile';
+$topbarIcon  = 'bi-person-fill';
+$topbarSub   = 'Manage your account details and password';
+include 'topbar.php';
+?>
 
 <?php
 $alerts = [
@@ -34,235 +330,242 @@ $alerts = [
     'pwMismatch' => ['error','Password Mismatch','New passwords do not match.'],
     'pwShort'    => ['warning','Too Short','Password must be at least 6 characters.'],
 ];
-foreach($alerts as $k=>[$i,$t,$tx]) if(isset($_GET[$k])) echo "<script>Swal.fire({icon:'$i',title:'$t',text:'$tx',timer:2500}).then(()=>window.history.replaceState({},document.title,window.location.pathname));</script>";
+foreach($alerts as $k=>[$i,$t,$tx])
+    if(isset($_GET[$k]))
+        echo "<script>Swal.fire({icon:'$i',title:'$t',text:'$tx',timer:2500}).then(()=>window.history.replaceState({},document.title,window.location.pathname));</script>";
 ?>
 
-<style>
-.profile-avatar {
-    width: 110px; height: 110px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 4px solid white;
-    box-shadow: 0 4px 18px rgba(0,129,97,0.22);
-}
-.profile-avatar-placeholder {
-    width: 110px; height: 110px;
-    border-radius: 50%;
-    background: var(--ev-gradient);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 2.8rem; color: white;
-    border: 4px solid white;
-    box-shadow: 0 4px 18px rgba(0,129,97,0.22);
-    flex-shrink: 0;
-}
-.profile-hero {
-    background: var(--ev-gradient);
-    border-radius: 18px;
-    color: white;
-    padding: 28px 32px;
-    display: flex;
-    align-items: center;
-    gap: 24px;
-    margin-bottom: 24px;
-    position: relative;
-    overflow: hidden;
-}
-.profile-hero::after {
-    content: '';
-    position: absolute; right: -40px; top: -40px;
-    width: 200px; height: 200px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.08);
-}
-.profile-hero-info h3 { font-weight: 800; margin: 0 0 4px; }
-.profile-hero-info .role-badge {
-    background: rgba(255,255,255,0.22);
-    backdrop-filter: blur(4px);
-    border-radius: 20px;
-    padding: 3px 14px;
-    font-size: 13px;
-    font-weight: 600;
-    display: inline-block;
-}
-.profile-hero-info .role-desc { font-size: 13px; opacity: 0.8; margin-top: 4px; }
-.section-card { background: white; border-radius: 14px; box-shadow: 0 2px 12px rgba(0,129,97,0.08); padding: 24px; margin-bottom: 20px; }
-.section-card h6 { font-weight: 700; color: var(--ev-purple); border-bottom: 2px solid #b3ddd2; padding-bottom: 10px; margin-bottom: 18px; }
-.avatar-upload-wrap { position: relative; display: inline-block; cursor: pointer; }
-.avatar-upload-wrap input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
-.avatar-upload-overlay {
-    position: absolute; bottom: 4px; right: 4px;
-    background: var(--ev-purple);
-    color: white;
-    border-radius: 50%;
-    width: 28px; height: 28px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 13px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.18);
-    pointer-events: none;
-}
-</style>
+<!-- ── Page Body ─────────────────────────────────────────────────────────── -->
+<div class="profile-body">
 
-<div class="page-body">
-
-    <!-- Hero Card -->
+    <!-- Hero Banner -->
     <div class="profile-hero">
-        <div class="avatar-upload-wrap" title="Click to change photo (save to apply)">
+        <div class="avatar-wrap" title="Click to change photo">
             <?php if(!empty($u['profile_image'])): ?>
-            <img src="../<?php echo htmlspecialchars($u['profile_image']); ?>" alt="Avatar" class="profile-avatar" id="heroAvatar">
+                <img src="../<?php echo htmlspecialchars($u['profile_image']); ?>" alt="Avatar" class="avatar-img" id="heroAvatar">
             <?php else: ?>
-            <div class="profile-avatar-placeholder" id="heroAvatarPlaceholder">
-                <i class="bi bi-person-fill"></i>
-            </div>
-            <img src="" alt="" class="profile-avatar" id="heroAvatar" style="display:none;">
+                <div class="avatar-placeholder" id="heroAvatarPlaceholder"><i class="bi bi-person-fill"></i></div>
+                <img src="" alt="" class="avatar-img" id="heroAvatar" style="display:none;">
             <?php endif; ?>
-            <input type="file" accept="image/*" id="avatarFileInput" onchange="previewHeroAvatar(this)" title="Upload profile photo">
+            <input type="file" accept="image/*" id="avatarFileInput" class="avatar-file-input" onchange="previewHeroAvatar(this)">
             <div class="avatar-upload-overlay"><i class="bi bi-camera-fill"></i></div>
         </div>
-        <div class="profile-hero-info">
-            <h3><?php echo htmlspecialchars($fullName); ?></h3>
-            <span class="role-badge"><i class="bi bi-shield-check me-1"></i><?php echo htmlspecialchars($u['roleName']); ?></span>
+
+        <div class="hero-info">
+            <h2 class="hero-name"><?php echo htmlspecialchars($fullName); ?></h2>
+            <div class="hero-role-badge">
+                <i class="bi bi-shield-check"></i>
+                <?php echo htmlspecialchars($u['roleName']); ?>
+            </div>
             <?php if(!empty($u['roleDesc'])): ?>
-            <div class="role-desc"><?php echo htmlspecialchars($u['roleDesc']); ?></div>
+                <div class="hero-role-desc"><?php echo htmlspecialchars($u['roleDesc']); ?></div>
             <?php endif; ?>
-            <div style="font-size:13px;opacity:0.85;margin-top:6px;">
-                <i class="bi bi-envelope me-1"></i><?php echo htmlspecialchars($u['email']); ?>
-                &nbsp;|&nbsp;
-                <i class="bi bi-calendar me-1"></i>Member since <?php echo date('M Y', strtotime($u['dateCreated'])); ?>
+            <div class="hero-meta">
+                <div class="hero-meta-item"><i class="bi bi-envelope"></i><?php echo htmlspecialchars($u['email']); ?></div>
+                <div class="hero-meta-item"><i class="bi bi-calendar3"></i>Member since <?php echo date('M Y', strtotime($u['dateCreated'])); ?></div>
+                <div class="hero-meta-item"><i class="bi bi-hash"></i><?php echo htmlspecialchars($u['userNo']); ?></div>
             </div>
         </div>
     </div>
 
-    <div class="row g-4">
-        <!-- Edit Profile Form -->
-        <div class="col-lg-7">
-            <div class="section-card">
-                <h6><i class="bi bi-person-lines-fill me-2"></i>Personal Information</h6>
-                <form method="POST" action="../backend/profileAuth.php" enctype="multipart/form-data" id="profileForm">
-            <?php csrf_field(); ?>
-                    <input type="hidden" name="avatarFromPreview" id="avatarFromPreview">
-                    <!-- Hidden file that carries the selected avatar into this form -->
-                    <input type="file" name="profile_image" id="profileImageInput" accept="image/*" style="display:none;">
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <label class="form-label fw-semibold small">First Name <span class="text-danger">*</span></label>
-                            <input type="text" name="givenName" value="<?php echo htmlspecialchars($u['givenName']); ?>" class="form-control" required>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label fw-semibold small">Middle Name</label>
-                            <input type="text" name="midName" value="<?php echo htmlspecialchars($u['midName']??''); ?>" class="form-control">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label fw-semibold small">Last Name <span class="text-danger">*</span></label>
-                            <input type="text" name="surName" value="<?php echo htmlspecialchars($u['surName']); ?>" class="form-control" required>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label fw-semibold small">Ext (Jr/Sr)</label>
-                            <input type="text" name="extName" value="<?php echo htmlspecialchars($u['extName']??''); ?>" class="form-control">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label fw-semibold small">Gender</label>
-                            <select name="gender" class="form-select">
-                                <option value="Male"   <?php echo $u['gender']==='Male'  ?'selected':''; ?>>Male</option>
-                                <option value="Female" <?php echo $u['gender']==='Female'?'selected':''; ?>>Female</option>
-                                <option value="Other"  <?php echo $u['gender']==='Other' ?'selected':''; ?>>Other</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label fw-semibold small">Birthdate</label>
-                            <input type="date" name="birthdate" value="<?php echo $u['birthdate']??''; ?>" class="form-control">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label fw-semibold small">Civil Status</label>
-                            <select name="civilStatus" class="form-select">
-                                <?php foreach(['Single','Married','Widowed','Separated'] as $cs): ?>
-                                <option <?php echo ($u['civilStatus']??'')===$cs?'selected':''; ?>><?php echo $cs; ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold small">Contact No</label>
-                            <input type="text" name="contactNo" value="<?php echo htmlspecialchars($u['contactNo']??''); ?>" class="form-control">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold small">Email</label>
-                            <input type="email" value="<?php echo htmlspecialchars($u['email']); ?>" class="form-control" disabled title="Contact Admin to change email">
-                            <small class="text-muted">Contact Admin to change email.</small>
-                        </div>
+    <!-- Main Grid -->
+    <div class="profile-grid">
+
+        <!-- Left: Personal Info Form -->
+        <div>
+            <div class="section-label"><i class="bi bi-person-lines-fill"></i> Personal Information</div>
+            <div class="p-card">
+                <div class="p-card-header">
+                    <div class="hdr-icon"><i class="bi bi-person-lines-fill"></i></div>
+                    <div>
+                        <div class="hdr-title">Edit Profile</div>
+                        <div class="hdr-desc">Update your personal details</div>
                     </div>
-                    <div class="mt-4 d-flex gap-2">
-                        <button type="submit" name="profileUpdate" class="btn btn-ev"><i class="bi bi-check-circle me-1"></i>Save Changes</button>
-                    </div>
-                </form>
+                </div>
+                <div class="p-card-body">
+                    <form method="POST" action="../backend/profileAuth.php" enctype="multipart/form-data" id="profileForm">
+                        <?php csrf_field(); ?>
+                        <input type="hidden" name="avatarFromPreview" id="avatarFromPreview">
+                        <input type="file" name="profile_image" id="profileImageInput" accept="image/*" style="display:none;">
+
+                        <!-- Name row -->
+                        <div class="field-row field-row-3" style="margin-bottom:1rem;">
+                            <div class="field-group" style="margin:0;">
+                                <label>First Name <span class="req">*</span></label>
+                                <input type="text" name="givenName" value="<?php echo htmlspecialchars($u['givenName']); ?>" class="form-control" required>
+                            </div>
+                            <div class="field-group" style="margin:0;">
+                                <label>Middle Name</label>
+                                <input type="text" name="midName" value="<?php echo htmlspecialchars($u['midName']??''); ?>" class="form-control">
+                            </div>
+                            <div class="field-group" style="margin:0;">
+                                <label>Last Name <span class="req">*</span></label>
+                                <input type="text" name="surName" value="<?php echo htmlspecialchars($u['surName']); ?>" class="form-control" required>
+                            </div>
+                        </div>
+
+                        <!-- Details row -->
+                        <div class="field-row field-row-4" style="margin-bottom:1rem;">
+                            <div class="field-group" style="margin:0;">
+                                <label>Ext (Jr/Sr)</label>
+                                <input type="text" name="extName" value="<?php echo htmlspecialchars($u['extName']??''); ?>" class="form-control">
+                            </div>
+                            <div class="field-group" style="margin:0;">
+                                <label>Gender</label>
+                                <select name="gender" class="form-select">
+                                    <option value="Male"   <?php echo $u['gender']==='Male'  ?'selected':''; ?>>Male</option>
+                                    <option value="Female" <?php echo $u['gender']==='Female'?'selected':''; ?>>Female</option>
+                                    <option value="Other"  <?php echo $u['gender']==='Other' ?'selected':''; ?>>Other</option>
+                                </select>
+                            </div>
+                            <div class="field-group" style="margin:0;">
+                                <label>Birthdate</label>
+                                <input type="date" name="birthdate" value="<?php echo $u['birthdate']??''; ?>" class="form-control">
+                            </div>
+                            <div class="field-group" style="margin:0;">
+                                <label>Civil Status</label>
+                                <select name="civilStatus" class="form-select">
+                                    <?php foreach(['Single','Married','Widowed','Separated'] as $cs): ?>
+                                    <option <?php echo ($u['civilStatus']??'')===$cs?'selected':''; ?>><?php echo $cs; ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Contact + Email -->
+                        <div class="field-row field-row-2" style="margin-bottom:1.2rem;">
+                            <div class="field-group" style="margin:0;">
+                                <label>Contact No</label>
+                                <input type="text" name="contactNo" value="<?php echo htmlspecialchars($u['contactNo']??''); ?>" class="form-control">
+                            </div>
+                            <div class="field-group" style="margin:0;">
+                                <label>Email</label>
+                                <input type="email" value="<?php echo htmlspecialchars($u['email']); ?>" class="form-control" disabled>
+                                <div class="field-hint">Contact Admin to change email.</div>
+                            </div>
+                        </div>
+
+                        <button type="submit" name="profileUpdate" class="btn-gold">
+                            <i class="bi bi-check-circle"></i> Save Changes
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
 
-        <!-- Right Column: Role Info + Change Password -->
-        <div class="col-lg-5">
-            <!-- Role Info Card -->
-            <div class="section-card">
-                <h6><i class="bi bi-shield-check me-2"></i>Role & Access</h6>
-                <div class="d-flex align-items-center gap-3 mb-3">
-                    <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#e8f5f1,#c8efe4);display:flex;align-items:center;justify-content:center;">
-                        <i class="bi bi-person-badge" style="font-size:1.4rem;color:var(--ev-purple);"></i>
-                    </div>
+        <!-- Right column -->
+        <div>
+            <!-- Role & Access -->
+            <div class="section-label"><i class="bi bi-shield-check"></i> Role & Access</div>
+            <div class="p-card">
+                <div class="p-card-header">
+                    <div class="hdr-icon" style="background:var(--mint-dark);color:var(--navy-mid);"><i class="bi bi-shield-check"></i></div>
                     <div>
-                        <div class="fw-bold"><?php echo htmlspecialchars($u['roleName']); ?></div>
-                        <div class="text-muted small"><?php echo htmlspecialchars($u['roleDesc'] ?: 'No description'); ?></div>
+                        <div class="hdr-title">Role & Access</div>
+                        <div class="hdr-desc">Your permissions in the system</div>
                     </div>
                 </div>
-                <table class="table table-sm table-borderless mb-0 small">
-                    <tr><td class="text-muted">User No</td><td class="fw-semibold"><?php echo htmlspecialchars($u['userNo']); ?></td></tr>
-                    <tr><td class="text-muted">Date Joined</td><td class="fw-semibold"><?php echo date('F d, Y', strtotime($u['dateCreated'])); ?></td></tr>
-                    <tr><td class="text-muted">Status</td><td><span class="badge bg-success">Active</span></td></tr>
-                </table>
+                <div class="p-card-body">
+                    <div class="role-banner">
+                        <div class="role-banner-icon"><i class="bi bi-person-badge"></i></div>
+                        <div>
+                            <div class="role-banner-title"><?php echo htmlspecialchars($u['roleName']); ?></div>
+                            <div class="role-banner-desc"><?php echo htmlspecialchars($u['roleDesc'] ?: 'No description'); ?></div>
+                        </div>
+                    </div>
+                    <table class="info-table">
+                        <tr>
+                            <td>User No</td>
+                            <td><?php echo htmlspecialchars($u['userNo']); ?></td>
+                        </tr>
+                        <tr>
+                            <td>Date Joined</td>
+                            <td><?php echo date('F d, Y', strtotime($u['dateCreated'])); ?></td>
+                        </tr>
+                        <tr>
+                            <td>Status</td>
+                            <td><span class="status-active">Active</span></td>
+                        </tr>
+                    </table>
+                </div>
             </div>
 
-            <!-- Change Password Card -->
-            <div class="section-card">
-                <h6><i class="bi bi-key me-2"></i>Change Password</h6>
-                <form method="POST" action="../backend/profileAuth.php">
-            <?php csrf_field(); ?>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold small">Current Password</label>
-                        <input type="password" name="currentPassword" class="form-control" required autocomplete="current-password">
+            <!-- Change Password -->
+            <div class="section-label" style="margin-top:.2rem;"><i class="bi bi-key"></i> Security</div>
+            <div class="p-card">
+                <div class="p-card-header">
+                    <div class="hdr-icon"><i class="bi bi-key-fill"></i></div>
+                    <div>
+                        <div class="hdr-title">Change Password</div>
+                        <div class="hdr-desc">Keep your account secure</div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold small">New Password</label>
-                        <input type="password" name="newPassword" class="form-control" required autocomplete="new-password" minlength="6">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold small">Confirm New Password</label>
-                        <input type="password" name="confirmPassword" class="form-control" required autocomplete="new-password" minlength="6">
-                    </div>
-                    <button type="submit" name="changeOwnPassword" class="btn btn-warning w-100"><i class="bi bi-lock-fill me-1"></i>Update Password</button>
-                </form>
+                </div>
+                <div class="p-card-body">
+                    <form method="POST" action="../backend/profileAuth.php">
+                        <?php csrf_field(); ?>
+
+                        <div class="field-group">
+                            <label>Current Password</label>
+                            <div class="pw-input-wrap">
+                                <input type="password" name="currentPassword" class="form-control" required autocomplete="current-password" id="pw0">
+                                <button type="button" class="pw-toggle" onclick="togglePw('pw0',this)"><i class="bi bi-eye"></i></button>
+                            </div>
+                        </div>
+
+                        <div class="field-group">
+                            <label>New Password</label>
+                            <div class="pw-input-wrap">
+                                <input type="password" name="newPassword" class="form-control" required autocomplete="new-password" minlength="6" id="pw1">
+                                <button type="button" class="pw-toggle" onclick="togglePw('pw1',this)"><i class="bi bi-eye"></i></button>
+                            </div>
+                        </div>
+
+                        <div class="field-group">
+                            <label>Confirm New Password</label>
+                            <div class="pw-input-wrap">
+                                <input type="password" name="confirmPassword" class="form-control" required autocomplete="new-password" minlength="6" id="pw2">
+                                <button type="button" class="pw-toggle" onclick="togglePw('pw2',this)"><i class="bi bi-eye"></i></button>
+                            </div>
+                        </div>
+
+                        <button type="submit" name="changeOwnPassword" class="btn-navy">
+                            <i class="bi bi-lock-fill"></i> Update Password
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-// When user picks image from hero, sync to the hidden file input in the form
 function previewHeroAvatar(input){
     if(!input.files || !input.files[0]) return;
     var reader = new FileReader();
     reader.onload = function(e){
-        // Show preview in hero
-        var ph = document.getElementById('heroAvatarPlaceholder');
+        var ph  = document.getElementById('heroAvatarPlaceholder');
         var img = document.getElementById('heroAvatar');
         if(ph) ph.style.display = 'none';
         img.src = e.target.result;
         img.style.display = 'block';
-    }
+    };
     reader.readAsDataURL(input.files[0]);
-
-    // Transfer the file to the hidden form input using DataTransfer
     try {
         var dt = new DataTransfer();
         dt.items.add(input.files[0]);
         document.getElementById('profileImageInput').files = dt.files;
-    } catch(e) {
-        // Fallback: won't work on all browsers; user must use Save Changes after picking
+    } catch(e) {}
+}
+
+function togglePw(id, btn){
+    var inp = document.getElementById(id);
+    var icon = btn.querySelector('i');
+    if(inp.type === 'password'){
+        inp.type = 'text';
+        icon.classList.replace('bi-eye','bi-eye-slash');
+    } else {
+        inp.type = 'password';
+        icon.classList.replace('bi-eye-slash','bi-eye');
     }
 }
 </script>

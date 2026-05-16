@@ -1,6 +1,6 @@
 <?php
 require_once 'database.php';
-session_start();
+require_once __DIR__ . '/csrf.php';
 if(!isset($_SESSION['userID'])){ echo '<div class="alert alert-danger">Not logged in.</div>'; exit(); }
 if(!in_array($_SESSION['roleName'], ['Admin','Owner','Cashier'])){ echo '<div class="alert alert-danger">Access denied.</div>'; exit(); }
 
@@ -42,31 +42,13 @@ $balClass = $cust['credit_balance'] > 0 ? 'warning' : 'success';
   </tbody>
 </table>
 
-<div class="row g-2">
-  <?php if(in_array($_SESSION['roleName'], ['Admin','Owner'])): ?>
-  <div class="col-6">
-    <form method="POST" action="../backend/customerAuth.php">
-      <input type="hidden" name="customerID" value="<?php echo $customerID; ?>">
-      <div class="mb-2"><label class="form-label small fw-semibold">Add Utang (₱)</label>
-        <input type="number" name="amount" step="0.01" min="0.01" class="form-control form-control-sm" required></div>
-      <div class="mb-2"><input type="text" name="notes" placeholder="Notes" class="form-control form-control-sm"></div>
-      <button type="submit" name="addCredit" class="btn btn-danger btn-sm w-100">
-        <i class="bi bi-plus-circle me-1"></i>Add Utang
-      </button>
-    </form>
-  </div>
-  <div class="col-6">
-  <?php else: ?>
-  <div class="col-12">
-  <?php endif; ?>
-    <form method="POST" action="../backend/customerAuth.php">
-      <input type="hidden" name="customerID" value="<?php echo $customerID; ?>">
-      <div class="mb-2"><label class="form-label small fw-semibold">Pay Amount (₱)</label>
-        <input type="number" name="amount" step="0.01" min="0.01" max="<?php echo $cust['credit_balance']; ?>" class="form-control form-control-sm" required></div>
-      <div class="mb-2"><input type="text" name="notes" placeholder="Notes" class="form-control form-control-sm"></div>
-      <button type="submit" name="payCredit" class="btn btn-success btn-sm w-100">
-        <i class="bi bi-check-circle me-1"></i>Record Payment
-      </button>
-    </form>
-  </div>
-</div>
+<form method="POST" action="../backend/customerAuth.php">
+  <?php csrf_field(); ?>
+  <input type="hidden" name="customerID" value="<?php echo $customerID; ?>">
+  <div class="mb-2"><label class="form-label small fw-semibold">Pay Amount (₱)</label>
+    <input type="number" name="amount" step="0.01" min="0.01" max="<?php echo $cust['credit_balance']; ?>" class="form-control form-control-sm" required></div>
+  <div class="mb-2"><input type="text" name="notes" placeholder="Notes" class="form-control form-control-sm"></div>
+  <button type="submit" name="payCredit" class="btn btn-success btn-sm w-100">
+    <i class="bi bi-check-circle me-1"></i>Record Payment
+  </button>
+</form>
