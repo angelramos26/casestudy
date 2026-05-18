@@ -159,14 +159,20 @@ if (isset($_POST['itemToggleStatus'])) {
 
 // ── Soft-delete (set status = Inactive) ────────────────────
 if (isset($_POST['itemDelete'])) {
+    header('Content-Type: application/json');
     $id = intval($_POST['itemID']);
     $stmt = $conn->prepare("UPDATE menu_item SET status='Inactive', is_available=0 WHERE itemID=?");
     $stmt->bind_param("i", $id);
-    $stmt->execute();
-    pusherBroadcast('menu-changed', [
-        'action' => 'deactivated',
-        'itemID' => $id,
-        'by'     => $_SESSION['userName'] ?? '',
-    ]);
-    header("Location: ../frontend/menu.php?itemDeleted"); exit();
+    if ($stmt->execute()) {
+        $stmt->close();
+        pusherBroadcast('menu-changed', [
+            'action' => 'deactivated',
+            'itemID' => $id,
+            'by'     => $_SESSION['userName'] ?? '',
+        ]);
+        echo json_encode(['success' => true]);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Database error.']);
+    }
+    exit();
 }

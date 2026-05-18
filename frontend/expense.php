@@ -152,6 +152,15 @@ table#expenseTable tfoot td {
 }
 .btn-del:hover { background: var(--c-danger); color: #fff; border-color: var(--c-danger); }
 
+.btn-edit {
+    background: var(--charcoal); color: var(--orange);
+    border: none; border-radius: var(--r-sm);
+    width: 30px; height: 30px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 13px; cursor: pointer; transition: all .15s;
+}
+.btn-edit:hover { background: var(--charcoal-mid); }
+
 /* DataTables overrides */
 .dataTables_wrapper .dataTables_filter input,
 .dataTables_wrapper .dataTables_length select {
@@ -184,10 +193,11 @@ table#expenseTable tfoot td {
 
 <?php
 $alerts = [
-    'savedData'      => ['success', 'Saved!',            'Expense recorded.'],
-    'expenseDeleted' => ['success', 'Deleted!',           'Expense removed.'],
-    'categoryAdded'  => ['success', 'Category Added',     'Expense category saved.'],
-    'emptyFields'    => ['warning', 'Required Fields',    'Fill in required fields.'],
+    'savedData'       => ['success', 'Saved!',            'Expense recorded.'],
+    'expenseDeleted'  => ['success', 'Deleted!',           'Expense removed.'],
+    'expenseUpdated'  => ['success', 'Updated!',           'Expense record updated.'],
+    'categoryAdded'   => ['success', 'Category Added',     'Expense category saved.'],
+    'emptyFields'     => ['warning', 'Required Fields',    'Fill in required fields.'],
 ];
 foreach($alerts as $k => [$i,$t,$tx])
     if(isset($_GET[$k]))
@@ -326,14 +336,20 @@ include 'topbar.php';
                     <td><span class="user-cell"><?php echo htmlspecialchars($r['byUser']); ?></span></td>
                     <td>
                         <?php if($_SESSION['roleName'] === 'Admin'): ?>
-                        <form method="POST" action="../backend/expenseAuth.php" class="d-inline"
-                              onsubmit="return confirm('Delete this expense?')">
-                            <?php csrf_field(); ?>
-                            <input type="hidden" name="expenseID" value="<?php echo $r['expenseID']; ?>">
-                            <button type="submit" name="expenseDelete" class="btn-del" title="Delete">
-                                <i class="bi bi-trash3"></i>
+                        <div class="d-flex gap-1 align-items-center">
+                            <button class="btn-edit" title="Edit"
+                                onclick="openEditExpense(<?php echo htmlspecialchars(json_encode($r), ENT_QUOTES); ?>)">
+                                <i class="bi bi-pencil"></i>
                             </button>
-                        </form>
+                            <form method="POST" action="../backend/expenseAuth.php" class="d-inline"
+                                  onsubmit="return confirm('Delete this expense?')">
+                                <?php csrf_field(); ?>
+                                <input type="hidden" name="expenseID" value="<?php echo $r['expenseID']; ?>">
+                                <button type="submit" name="expenseDelete" class="btn-del" title="Delete">
+                                    <i class="bi bi-trash3"></i>
+                                </button>
+                            </form>
+                        </div>
                         <?php endif; ?>
                     </td>
                 </tr>
@@ -420,6 +436,64 @@ include 'topbar.php';
     </div>
 </div>
 <?php endif; ?>
+
+<!-- Edit Expense Modal -->
+<?php if($_SESSION['roleName'] === 'Admin'): ?>
+<div class="modal fade modal-navy" id="editExpenseModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="../backend/expenseAuth.php">
+                <?php csrf_field(); ?>
+                <input type="hidden" name="expenseID" id="editExpenseID">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-pencil me-2"></i>Edit Expense</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" style="padding:20px 24px;">
+                    <div class="mb-3">
+                        <label class="form-label-sm">Category <span style="color:var(--c-danger);">*</span></label>
+                        <select name="expenseCategoryID" id="editExpenseCat" class="form-field" style="cursor:pointer;" required>
+                            <option value="">— Select Category —</option>
+                            <?php $categories->data_seek(0); while($c = $categories->fetch_assoc()): ?>
+                            <option value="<?php echo $c['expenseCategoryID']; ?>"><?php echo htmlspecialchars($c['categoryName']); ?></option>
+                            <?php endwhile; ?>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label-sm">Amount (₱) <span style="color:var(--c-danger);">*</span></label>
+                        <input type="number" name="amount" id="editExpenseAmount" step="0.01" min="0.01" class="form-field" required placeholder="0.00">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label-sm">Description</label>
+                        <input type="text" name="description" id="editExpenseDesc" class="form-field" placeholder="What was this expense for?">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label-sm">Date <span style="color:var(--c-danger);">*</span></label>
+                        <input type="date" name="expense_date" id="editExpenseDate" class="form-field" required>
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top:1px solid var(--s-border);padding:12px 24px;gap:8px;">
+                    <button type="button" class="btn-cancel" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" name="expenseUpdate" class="btn-save">
+                        <i class="bi bi-check2-circle me-1"></i>Update Expense
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
+<script>
+function openEditExpense(r) {
+    document.getElementById('editExpenseID').value     = r.expenseID;
+    document.getElementById('editExpenseCat').value    = r.expenseCategoryID;
+    document.getElementById('editExpenseAmount').value = r.amount;
+    document.getElementById('editExpenseDesc').value   = r.description || '';
+    document.getElementById('editExpenseDate').value   = r.expense_date;
+    new bootstrap.Modal(document.getElementById('editExpenseModal')).show();
+}
+</script>
 
 <script>
 $(document).ready(function(){

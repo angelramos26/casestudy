@@ -1009,7 +1009,7 @@ CREATE TABLE `system_settings` (
 --
 
 INSERT INTO `system_settings` (`settingID`, `setting_key`, `setting_value`) VALUES
-(1, 'store_name', '7Evelyn Store'),
+(1, 'store_name', 'SM Store'),
 (2, 'store_address', '123 Rizal Street, Brgy. Evelyn, Philippines'),
 (3, 'store_contact', '09XX-XXX-XXXX'),
 (4, 'store_tin', '000-000-000-000'),
@@ -1017,7 +1017,7 @@ INSERT INTO `system_settings` (`settingID`, `setting_key`, `setting_value`) VALU
 (6, 'tax_enabled', '0'),
 (7, 'discount_senior', '20'),
 (8, 'discount_pwd', '20'),
-(9, 'receipt_footer', 'Thank you for shopping at 7Evelyn!'),
+(9, 'receipt_footer', 'Thank you for shopping at SM!'),
 (10, 'currency_symbol', '₱'),
 (11, 'low_stock_threshold', '10'),
 (12, 'expiry_alert_days', '30');
@@ -1052,7 +1052,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`userID`, `roleID`, `userNo`, `email`, `password`, `givenName`, `midName`, `surName`, `extName`, `gender`, `birthdate`, `civilStatus`, `contactNo`, `profile_image`, `dateCreated`, `dateDeleted`) VALUES
-(1, 1, 'EMP-0001', 'admin@7evelyn.com', '$2y$10$iNxHxWMJQh5vtClVicL2sOc8De6QKi3mNDYmkJdxrHcSZvPXCdr/a', 'Admin', '', 'User', '', 'Male', '1990-01-01', 'Single', '09000000000', 'uploads/profiles/user_1_6a07483697121.jpg', '2026-05-15 09:12:52', NULL),
+(1, 1, 'EMP-0001', 'admin@SM.com', '$2y$10$iNxHxWMJQh5vtClVicL2sOc8De6QKi3mNDYmkJdxrHcSZvPXCdr/a', 'Admin', '', 'User', '', 'Male', '1990-01-01', 'Single', '09000000000', 'uploads/profiles/user_1_6a07483697121.jpg', '2026-05-15 09:12:52', NULL),
 (2, 3, 'EMP-0002', 'owner@gmail.com', '$2y$10$T6Wk59125D9DFacwFMoSOOwzMHxis0pUAqqLY5Ql4PqznHsgkmaAy', 'Owner', '', 'User', '', 'Female', '1985-06-15', 'Single', '09111111111', NULL, '2026-05-15 09:12:52', NULL),
 (3, 2, 'EMP-0003', 'cashier@gmail.com', '$2y$10$2j.NDo6kSUKHefN/CF4iPu4R9XF3PJvuFhYT5.q7Y7s/lwkrcYroO', 'Cashier', '', 'User', '', 'Female', '1995-03-20', 'Single', '09222222222', NULL, '2026-05-15 09:12:52', NULL),
 (4, 1, 'EMP-001', 'admin@gmail.com', '$2y$10$VNlg65JuT2RWqIW3wS8taeWTCX4ftdzQVGWjMqZhXGAenfwK/LAlS', 'John Marlou', '', 'Castillo', '', 'Male', '2026-05-15', 'Single', '', 'uploads/profiles/user_4_6a07092f40006.png', '2026-05-15 09:15:43', NULL);

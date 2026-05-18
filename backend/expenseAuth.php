@@ -64,6 +64,35 @@ if (isset($_POST['expenseSave'])) {
     header("Location: ../frontend/expense.php?savedData"); exit();
 }
 
+// ── Edit expense record ────────────────────────────────────
+if (isset($_POST["expenseUpdate"])) {
+    $id          = intval($_POST["expenseID"]);
+    $catID       = intval($_POST["expenseCategoryID"]);
+    $amount      = floatval($_POST["amount"]);
+    $description = sanitize($_POST["description"] ?? "");
+    $date        = $_POST["expense_date"] ?: date("Y-m-d");
+
+    if (!$id || !$catID || $amount <= 0) {
+        header("Location: ../frontend/expense.php?emptyFields"); exit();
+    }
+
+    $stmt = $conn->prepare(
+        "UPDATE expense SET expenseCategoryID=?, amount=?, description=?, expense_date=? WHERE expenseID=?"
+    );
+    $stmt->bind_param("idssi", $catID, $amount, $description, $date, $id);
+    $stmt->execute();
+    $stmt->close();
+
+    pusherBroadcast("expense-changed", [
+        "action"      => "updated",
+        "expenseID"   => $id,
+        "amount"      => $amount,
+        "description" => $description,
+        "by"          => $_SESSION["userName"] ?? "",
+    ]);
+    header("Location: ../frontend/expense.php?expenseUpdated"); exit();
+}
+
 // ── Delete expense record ───────────────────────────────────
 if (isset($_POST['expenseDelete'])) {
     $id = intval($_POST['expenseID']);

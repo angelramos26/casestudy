@@ -427,7 +427,22 @@ function deleteItem(itemID, name) {
             fd.append('itemID', itemID);
             fd.append('csrf_token', csrf());
             fetch('../backend/menuItemAuth.php', { method: 'POST', body: fd })
-            .then(() => location.reload());
+            .then(res => res.json())
+            .then(d => {
+                if (d.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Item removed!',
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => location.reload());
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Error', text: d.message || 'Could not remove item.' });
+                }
+            })
+            .catch(() => {
+                Swal.fire({ icon: 'error', title: 'Error', text: 'Request failed. Please try again.' });
+            });
         }
     });
 }
