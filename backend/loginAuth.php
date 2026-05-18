@@ -3,7 +3,7 @@ require_once 'database.php';
 require_once __DIR__ . '/csrf.php';
 
 if(isset($_POST['loginAuth'])){
-    csrf_verify(); // validate token only on actual form submission
+    csrf_verify();
     $email    = $_POST['email'];
     $password = $_POST['password'];
 
@@ -19,7 +19,12 @@ if(isset($_POST['loginAuth'])){
         $_SESSION['roleName'] = $row['roleName'];
         $_SESSION['userName'] = $row['givenName'] . ' ' . $row['surName'];
         csrf_regenerate();
-        header("Location: ../frontend/dashboard.php");
+
+        if($row['roleName'] === 'Kitchen'){
+            header("Location: ../frontend/kitchen.php");
+        } else {
+            header("Location: ../frontend/dashboard.php");
+        }
         exit();
     } else {
         header("Location: ../index.php?invalid");

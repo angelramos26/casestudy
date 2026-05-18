@@ -1,18 +1,33 @@
 <?php
 require_once '../backend/database.php';
-session_start();
 if(!isset($_SESSION['userID'])){ header("Location: ../index.php"); exit(); }
 if(!in_array($_SESSION['roleName'], ['Admin','Owner'])){ header("Location: dashboard.php"); exit(); }
-$pageTitle = "Reports – 7Evelyn POS";
+$pageTitle = "Reports – Restaurant POS";
 
 $report   = $_GET['report'] ?? 'daily_sales';
 $dateFrom = $_GET['date_from'] ?? date('Y-m-01');
 $dateTo   = $_GET['date_to'] ?? date('Y-m-d');
+
+// Dynamic restaurant name for export filename
+$restName = getSetting($conn, 'restaurant_name') ?: 'SM-POS';
+$exportPrefix = strtolower(preg_replace('/[^a-zA-Z0-9]+/', '-', trim($restName)));
 ?>
 <?php include 'header.php'; ?>
 <?php include 'nav.php'; ?>
 
 <style>
+/* ── Bridge: map old brand-* vars to the current design tokens ── */
+:root {
+    --brand-navy:     var(--charcoal);
+    --brand-yellow:   var(--orange);
+    --brand-yellow-d: var(--orange-dark);
+    --brand-mint:     var(--s-bg);
+    --card-bg:        var(--c-white);
+    --text-main:      var(--t-main);
+    --border:         var(--s-border);
+    --shadow-card:    var(--sh-sm);
+    --shadow-btn:     0 2px 6px rgba(26,26,26,0.15);
+}
 
 /* ── Page ─────────────────────────────────── */
 .rp-page { padding: 28px 32px; background: var(--brand-mint); min-height: 100vh; }
@@ -33,7 +48,7 @@ $dateTo   = $_GET['date_to'] ?? date('Y-m-d');
 .btn-print {
   display: inline-flex; align-items: center; gap: 6px;
   border: 1.5px solid var(--border); background: #fff;
-  color: var(--text-main); border-radius: var(--radius-sm);
+  color: var(--text-main); border-radius: var(--r-sm);
   padding: 7px 14px; font-size: .82rem; font-weight: 600; cursor: pointer;
   transition: border-color .15s;
 }
@@ -41,7 +56,7 @@ $dateTo   = $_GET['date_to'] ?? date('Y-m-d');
 .btn-excel {
   display: inline-flex; align-items: center; gap: 6px;
   background: var(--brand-yellow); color: var(--brand-navy);
-  border: none; border-radius: var(--radius-sm);
+  border: none; border-radius: var(--r-sm);
   padding: 7px 14px; font-size: .82rem; font-weight: 700; cursor: pointer;
   box-shadow: var(--shadow-btn); transition: background .15s;
 }
@@ -50,14 +65,14 @@ $dateTo   = $_GET['date_to'] ?? date('Y-m-d');
 /* ── Report type tabs ─────────────────────── */
 .report-tabs {
   display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px;
-  background: var(--card-bg); border-radius: var(--radius-lg);
+  background: var(--card-bg); border-radius: var(--r-lg);
   padding: 12px 16px; box-shadow: var(--shadow-card); border: 1.5px solid var(--border);
 }
 .report-tab {
   display: inline-flex; align-items: center; gap: 6px;
   border: 1.5px solid var(--border); border-radius: 50px;
   padding: 6px 14px; font-size: .78rem; font-weight: 600;
-  color: var(--text-muted); text-decoration: none; background: transparent;
+  color: var(--t-muted); text-decoration: none; background: transparent;
   transition: all .15s; white-space: nowrap;
 }
 .report-tab:hover { border-color: var(--brand-navy); color: var(--brand-navy); background: var(--brand-mint); }
@@ -69,22 +84,22 @@ $dateTo   = $_GET['date_to'] ?? date('Y-m-d');
 
 /* ── Date filter card ─────────────────────── */
 .date-filter-card {
-  background: var(--card-bg); border-radius: var(--radius-md);
+  background: var(--card-bg); border-radius: var(--r-md);
   padding: 16px 20px; margin-bottom: 20px;
   box-shadow: var(--shadow-card); border: 1.5px solid var(--border);
   display: flex; align-items: flex-end; gap: 14px; flex-wrap: wrap;
 }
-.date-filter-card label { font-size: .73rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; display: block; margin-bottom: 5px; }
+.date-filter-card label { font-size: .73rem; font-weight: 600; color: var(--t-muted); text-transform: uppercase; letter-spacing: .05em; display: block; margin-bottom: 5px; }
 .date-input {
-  border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border); border-radius: var(--r-sm);
   padding: 8px 12px; font-size: .86rem; color: var(--text-main);
   background: var(--card-bg); outline: none; transition: border-color .15s;
 }
-.date-input:focus { border-color: var(--brand-yellow); box-shadow: 0 0 0 3px rgba(249,217,74,.18); }
+.date-input:focus { border-color: var(--brand-yellow); box-shadow: 0 0 0 3px rgba(239,130,13,.18); }
 .btn-generate {
   display: inline-flex; align-items: center; gap: 6px;
   background: var(--brand-navy); color: #fff;
-  border: none; border-radius: var(--radius-sm);
+  border: none; border-radius: var(--r-sm);
   padding: 9px 18px; font-size: .84rem; font-weight: 700; cursor: pointer;
   transition: opacity .15s;
 }
@@ -105,12 +120,12 @@ $dateTo   = $_GET['date_to'] ?? date('Y-m-d');
 .stat-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 20px; }
 .stat-row-3 { grid-template-columns: repeat(3,1fr); }
 .stat-card-rp {
-  background: var(--card-bg); border-radius: var(--radius-lg);
+  background: var(--card-bg); border-radius: var(--r-lg);
   padding: 18px 20px; display: flex; align-items: center; gap: 14px;
   box-shadow: var(--shadow-card); border: 1.5px solid var(--border);
   transition: transform .18s, box-shadow .18s;
 }
-.stat-card-rp:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(38,35,65,.12); }
+.stat-card-rp:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(26,26,26,.12); }
 .stat-icon-rp {
   width: 44px; height: 44px; border-radius: 11px;
   display: flex; align-items: center; justify-content: center;
@@ -119,17 +134,17 @@ $dateTo   = $_GET['date_to'] ?? date('Y-m-d');
 .ic-purple { background: #f3f0ff; color: #553c9a; }
 .ic-blue   { background: #ebf4ff; color: #2b6cb0; }
 .ic-orange { background: #fff7ed; color: #c05621; }
-.ic-green  { background: #f0fff4; color: var(--success); }
-.ic-red    { background: #fff5f5; color: var(--danger); }
+.ic-green  { background: #f0fff4; color: var(--c-success); }
+.ic-red    { background: #fff5f5; color: var(--c-danger); }
 .ic-teal   { background: #e6fffa; color: #285e61; }
 .ic-yellow { background: #fffff0; color: #975a16; }
-.stat-lbl-rp { font-size: .72rem; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: .05em; }
+.stat-lbl-rp { font-size: .72rem; color: var(--t-muted); font-weight: 500; text-transform: uppercase; letter-spacing: .05em; }
 .stat-val-rp { font-size: 1.35rem; font-weight: 800; color: var(--brand-navy); line-height: 1.2; }
 .stat-val-rp.sm { font-size: 1.05rem; }
 
 /* ── Main card / table ────────────────────── */
 .main-card {
-  background: var(--card-bg); border-radius: var(--radius-lg);
+  background: var(--card-bg); border-radius: var(--r-lg);
   box-shadow: var(--shadow-card); border: 1.5px solid var(--border);
   overflow: hidden; margin-bottom: 20px;
 }
@@ -160,17 +175,12 @@ $dateTo   = $_GET['date_to'] ?? date('Y-m-d');
   font-size: .72rem; font-weight: 800;
 }
 
-/* ── Stock status ─────────────────────────── */
-.stock-ok  { display:inline-flex;align-items:center;gap:4px;background:#f0fff4;color:var(--success);border:1px solid #9ae6b4;border-radius:50px;padding:3px 10px;font-size:.72rem;font-weight:700; }
-.stock-low { display:inline-flex;align-items:center;gap:4px;background:#fff7ed;color:#c05621;border:1px solid #fbd38d;border-radius:50px;padding:3px 10px;font-size:.72rem;font-weight:700; }
-.stock-out { display:inline-flex;align-items:center;gap:4px;background:#fff5f5;color:var(--danger);border:1px solid #fed7d7;border-radius:50px;padding:3px 10px;font-size:.72rem;font-weight:700; }
-
 /* ── Category pill ────────────────────────── */
 .cat-pill { background: var(--brand-mint); color: var(--brand-navy); border-radius:50px; padding:3px 10px; font-size:.72rem; font-weight:600; }
 
 /* ── Amount helpers ───────────────────────── */
-.amt-pos { color: var(--success); font-weight: 700; }
-.amt-neg { color: var(--danger); font-weight: 700; }
+.amt-pos { color: var(--c-success); font-weight: 700; }
+.amt-neg { color: var(--c-danger); font-weight: 700; }
 .amt-main{ color: var(--brand-navy); font-weight: 700; }
 
 /* ── Profit breakdown table ───────────────── */
@@ -178,13 +188,13 @@ $dateTo   = $_GET['date_to'] ?? date('Y-m-d');
 .profit-table td { padding: 13px 20px; font-size: .9rem; color: var(--text-main); border-bottom: 1px solid #f0f0f5; }
 .profit-table tr:last-child td { border-bottom: none; background: #f7f7fb; font-size: 1rem; font-weight: 800; }
 .profit-table .label { font-weight: 500; }
-.profit-table .sub-label { color: var(--text-muted); font-size: .84rem; padding-left: 28px; }
+.profit-table .sub-label { color: var(--t-muted); font-size: .84rem; padding-left: 28px; }
 .profit-table .separator td { border-top: 2px solid var(--border); background: #fafafa; font-weight: 700; }
 
 /* ── Expenses total banner ────────────────── */
 .exp-banner {
   display: flex; align-items: center; gap: 12px;
-  background: #fff7ed; border: 1.5px solid #fbd38d; border-radius: var(--radius-md);
+  background: #fff7ed; border: 1.5px solid #fbd38d; border-radius: var(--r-md);
   padding: 13px 18px; margin-bottom: 16px;
   font-size: .9rem; color: #7b341e; font-weight: 600;
 }
@@ -196,7 +206,7 @@ $dateTo   = $_GET['date_to'] ?? date('Y-m-d');
 
 /* ── Chart canvas ─────────────────────────── */
 .chart-card {
-  background: var(--card-bg); border-radius: var(--radius-lg);
+  background: var(--card-bg); border-radius: var(--r-lg);
   box-shadow: var(--shadow-card); border: 1.5px solid var(--border);
   padding: 20px 22px; margin-bottom: 20px;
 }
@@ -204,20 +214,20 @@ $dateTo   = $_GET['date_to'] ?? date('Y-m-d');
 
 /* ── DataTables override ──────────────────── */
 div.dataTables_wrapper div.dataTables_filter label,
-div.dataTables_wrapper div.dataTables_length label { color: var(--text-muted); font-size: .83rem; }
+div.dataTables_wrapper div.dataTables_length label { color: var(--t-muted); font-size: .83rem; }
 div.dataTables_wrapper div.dataTables_filter input,
 div.dataTables_wrapper div.dataTables_length select {
-  border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border); border-radius: var(--r-sm);
   padding: 5px 10px; font-size: .83rem; color: var(--text-main);
   background: var(--card-bg); outline: none;
 }
 div.dataTables_wrapper div.dataTables_filter input:focus { border-color: var(--brand-yellow); }
-div.dataTables_wrapper div.dataTables_paginate .paginate_button { border-radius: var(--radius-sm) !important; font-size: .8rem; }
+div.dataTables_wrapper div.dataTables_paginate .paginate_button { border-radius: var(--r-sm) !important; font-size: .8rem; }
 div.dataTables_wrapper div.dataTables_paginate .paginate_button.current,
 div.dataTables_wrapper div.dataTables_paginate .paginate_button.current:hover {
   background: var(--brand-navy) !important; color: #fff !important; border-color: var(--brand-navy) !important;
 }
-div.dataTables_wrapper .dataTables_info { color: var(--text-muted); font-size: .8rem; }
+div.dataTables_wrapper .dataTables_info { color: var(--t-muted); font-size: .8rem; }
 .dt-controls { padding: 14px 22px 8px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
 
 @media(max-width:900px){ .stat-row{grid-template-columns:repeat(2,1fr);} }
@@ -229,8 +239,8 @@ $types = [
     'daily_sales'   => ['bi-calendar-day',   'Daily Sales'],
     'weekly_sales'  => ['bi-calendar-week',  'Weekly Sales'],
     'monthly_sales' => ['bi-calendar-month', 'Monthly Sales'],
-    'product_sales' => ['bi-box-seam',       'Product Sales'],
-    'inventory'     => ['bi-archive',        'Inventory'],
+    'menu_sales'    => ['bi-journal-text',   'Menu Performance'],
+    'order_type'    => ['bi-bag',            'Order Type Mix'],
     'expenses'      => ['bi-wallet2',        'Expenses'],
     'profit'        => ['bi-graph-up-arrow', 'Profit / Loss'],
     'customer'      => ['bi-people',         'Customer Report'],
@@ -286,8 +296,9 @@ $types = [
 
   <!-- ══════════════ DAILY SALES ══════════════ -->
   <?php if($report === 'daily_sales'):
-    $data   = $conn->query("SELECT DATE(saleDate) AS d, COUNT(*) AS txn, SUM(total_amount) AS revenue, SUM(discount_amount) AS discounts FROM sales WHERE DATE(saleDate) BETWEEN '$dateFrom' AND '$dateTo' GROUP BY DATE(saleDate) ORDER BY d DESC");
-    $totals = $conn->query("SELECT COUNT(*) AS txn, SUM(total_amount) AS revenue, SUM(discount_amount) AS discounts FROM sales WHERE DATE(saleDate) BETWEEN '$dateFrom' AND '$dateTo'")->fetch_assoc();
+    $data   = $conn->query("SELECT DATE(datePaid) AS d, COUNT(*) AS txn, SUM(total_amount) AS revenue, SUM(discount_amount) AS discounts FROM orders WHERE status='Paid' AND DATE(datePaid) BETWEEN '$dateFrom' AND '$dateTo' GROUP BY DATE(datePaid) ORDER BY d DESC");
+    $_tq    = $conn->query("SELECT COUNT(*) AS txn, SUM(total_amount) AS revenue, SUM(discount_amount) AS discounts FROM orders WHERE status=\'Paid\' AND DATE(datePaid) BETWEEN \'$dateFrom\' AND \'$dateTo\'");
+    $totals = $_tq ? $_tq->fetch_assoc() : ['txn'=>0,'revenue'=>0,'discounts'=>0];
   ?>
   <div class="stat-row stat-row-3">
     <div class="stat-card-rp"><div class="stat-icon-rp ic-purple"><i class="bi bi-cash-stack"></i></div><div><div class="stat-lbl-rp">Total Revenue</div><div class="stat-val-rp sm">₱<?php echo number_format($totals['revenue'],2); ?></div></div></div>
@@ -301,7 +312,7 @@ $types = [
     <table id="reportTable">
       <thead><tr><th>Date</th><th>Transactions</th><th>Discounts</th><th>Revenue</th></tr></thead>
       <tbody>
-      <?php while($r=$data->fetch_assoc()): ?>
+      <?php while($data && ($r=$data->fetch_assoc())): ?>
       <tr>
         <td style="font-weight:600;"><?php echo date('D, M d, Y', strtotime($r['d'])); ?></td>
         <td style="text-align:center;"><?php echo $r['txn']; ?></td>
@@ -317,31 +328,42 @@ $types = [
 
   <!-- ══════════════ WEEKLY SALES ══════════════ -->
   <?php elseif($report === 'weekly_sales'):
-    $data = $conn->query("SELECT YEARWEEK(saleDate,1) AS wk, MIN(DATE(saleDate)) AS week_start, MAX(DATE(saleDate)) AS week_end, COUNT(*) AS txn, SUM(total_amount) AS revenue FROM sales WHERE DATE(saleDate) BETWEEN '$dateFrom' AND '$dateTo' GROUP BY wk ORDER BY wk DESC");
+    $data    = $conn->query("SELECT YEARWEEK(datePaid,1) AS wk, MIN(DATE(datePaid)) AS week_start, MAX(DATE(datePaid)) AS week_end, COUNT(*) AS txn, SUM(total_amount) AS revenue, SUM(discount_amount) AS discounts FROM orders WHERE status='Paid' AND DATE(datePaid) BETWEEN '$dateFrom' AND '$dateTo' GROUP BY wk ORDER BY wk DESC");
+    $_wtq    = $conn->query("SELECT COUNT(*) AS txn, SUM(total_amount) AS revenue, SUM(discount_amount) AS discounts FROM orders WHERE status=\'Paid\' AND DATE(datePaid) BETWEEN \'$dateFrom\' AND \'$dateTo\'");
+    $wtotals = $_wtq ? $_wtq->fetch_assoc() : ['txn'=>0,'revenue'=>0,'discounts'=>0];
+    $wrows   = [];
+    while($r=$data->fetch_assoc()) $wrows[] = $r;
   ?>
+  <div class="stat-row stat-row-3">
+    <div class="stat-card-rp"><div class="stat-icon-rp ic-purple"><i class="bi bi-cash-stack"></i></div><div><div class="stat-lbl-rp">Total Revenue</div><div class="stat-val-rp sm">₱<?php echo number_format($wtotals['revenue'],2); ?></div></div></div>
+    <div class="stat-card-rp"><div class="stat-icon-rp ic-blue"><i class="bi bi-receipt"></i></div><div><div class="stat-lbl-rp">Transactions</div><div class="stat-val-rp"><?php echo $wtotals['txn']; ?></div></div></div>
+    <div class="stat-card-rp"><div class="stat-icon-rp ic-orange"><i class="bi bi-tag"></i></div><div><div class="stat-lbl-rp">Discounts Given</div><div class="stat-val-rp sm">₱<?php echo number_format($wtotals['discounts'],2); ?></div></div></div>
+  </div>
   <div class="main-card">
     <div class="main-card-header"><i class="bi bi-table"></i> Weekly Breakdown</div>
     <div class="dt-controls" id="dt-search-area"></div>
     <div style="overflow-x:auto;">
     <table id="reportTable">
-      <thead><tr><th>Week</th><th>Period</th><th>Transactions</th><th>Revenue</th></tr></thead>
+      <thead><tr><th>Week</th><th>Period</th><th>Transactions</th><th>Discounts</th><th>Revenue</th></tr></thead>
       <tbody>
-      <?php while($r=$data->fetch_assoc()): ?>
+      <?php foreach($wrows as $r): ?>
       <tr>
         <td style="font-weight:700;">Week <?php echo substr($r['wk'],4); ?>, <?php echo substr($r['wk'],0,4); ?></td>
-        <td style="color:var(--text-muted);font-size:.83rem;"><?php echo date('M d',strtotime($r['week_start'])).' – '.date('M d, Y',strtotime($r['week_end'])); ?></td>
+        <td style="color:var(--t-muted);font-size:.83rem;"><?php echo date('M d',strtotime($r['week_start'])).' – '.date('M d, Y',strtotime($r['week_end'])); ?></td>
         <td style="text-align:center;"><?php echo $r['txn']; ?></td>
+        <td style="text-align:right;" class="amt-neg">-₱<?php echo number_format($r['discounts'],2); ?></td>
         <td style="text-align:right;" class="amt-main">₱<?php echo number_format($r['revenue'],2); ?></td>
       </tr>
-      <?php endwhile; ?>
+      <?php endforeach; ?>
       </tbody>
+      <tfoot><tr><td>TOTAL</td><td></td><td style="text-align:center;"><?php echo $wtotals['txn']; ?></td><td style="text-align:right;" class="amt-neg">-₱<?php echo number_format($wtotals['discounts'],2); ?></td><td style="text-align:right;" class="amt-main">₱<?php echo number_format($wtotals['revenue'],2); ?></td></tr></tfoot>
     </table>
     </div>
   </div>
 
   <!-- ══════════════ MONTHLY SALES ══════════════ -->
   <?php elseif($report === 'monthly_sales'):
-    $data = $conn->query("SELECT DATE_FORMAT(saleDate,'%Y-%m') AS mo, DATE_FORMAT(saleDate,'%M %Y') AS mo_label, COUNT(*) AS txn, SUM(total_amount) AS revenue, SUM(discount_amount) AS discounts FROM sales WHERE DATE(saleDate) BETWEEN '$dateFrom' AND '$dateTo' GROUP BY mo ORDER BY mo DESC");
+    $data = $conn->query("SELECT DATE_FORMAT(datePaid,'%Y-%m') AS mo, DATE_FORMAT(datePaid,'%M %Y') AS mo_label, COUNT(*) AS txn, SUM(total_amount) AS revenue, SUM(discount_amount) AS discounts FROM orders WHERE status='Paid' AND DATE(datePaid) BETWEEN '$dateFrom' AND '$dateTo' GROUP BY mo ORDER BY mo DESC");
     $rows = [];
     while($r=$data->fetch_assoc()) $rows[]=$r;
   ?>
@@ -377,9 +399,9 @@ $types = [
       datasets:[{
         label:'Revenue (₱)',
         data:<?php echo json_encode(array_column($rows,'revenue')); ?>,
-        backgroundColor:'#262341',
+        backgroundColor:'#1A1A1A',
         borderRadius:8,
-        hoverBackgroundColor:'#F9D94A'
+        hoverBackgroundColor:'#EF820D'
       }]
     },
     options:{
@@ -390,24 +412,24 @@ $types = [
   });
   </script>
 
-  <!-- ══════════════ PRODUCT SALES ══════════════ -->
-  <?php elseif($report === 'product_sales'):
-    $data = $conn->query("SELECT p.productName, c.categoryName, SUM(sd.sold_quantity) AS total_sold, SUM(sd.subtotal) AS revenue, AVG(sd.price) AS avg_price FROM sales_details sd JOIN product p ON sd.productID=p.productID JOIN category c ON p.categoryID=c.categoryID JOIN sales s ON sd.salesID=s.salesID WHERE DATE(s.saleDate) BETWEEN '$dateFrom' AND '$dateTo' GROUP BY sd.productID ORDER BY total_sold DESC");
+  <!-- ══════════════ MENU PERFORMANCE ══════════════ -->
+  <?php elseif($report === 'menu_sales'):
+    $data = $conn->query("SELECT mi.itemName, cat.categoryName, SUM(oi.quantity) AS total_sold, SUM(oi.price * oi.quantity) AS revenue, AVG(oi.price) AS avg_price FROM order_items oi JOIN menu_item mi ON oi.itemID=mi.itemID JOIN category cat ON mi.categoryID=cat.categoryID JOIN orders o ON oi.orderID=o.orderID WHERE o.status='Paid' AND DATE(o.datePaid) BETWEEN '$dateFrom' AND '$dateTo' AND oi.item_status != 'Void' GROUP BY oi.itemID ORDER BY total_sold DESC");
   ?>
   <div class="main-card">
-    <div class="main-card-header"><i class="bi bi-table"></i> Product Performance</div>
+    <div class="main-card-header"><i class="bi bi-table"></i> Menu Item Performance</div>
     <div class="dt-controls" id="dt-search-area"></div>
     <div style="overflow-x:auto;">
     <table id="reportTable">
-      <thead><tr><th>#</th><th>Product</th><th>Category</th><th>Qty Sold</th><th>Avg Price</th><th>Revenue</th></tr></thead>
+      <thead><tr><th>#</th><th>Item</th><th>Category</th><th>Qty Sold</th><th>Avg Price</th><th>Revenue</th></tr></thead>
       <tbody>
       <?php $rank=1; while($r=$data->fetch_assoc()): ?>
       <tr>
         <td><span class="rank-badge"><?php echo $rank++; ?></span></td>
-        <td style="font-weight:600;"><?php echo htmlspecialchars($r['productName']); ?></td>
+        <td style="font-weight:600;"><?php echo htmlspecialchars($r['itemName']); ?></td>
         <td><span class="cat-pill"><?php echo htmlspecialchars($r['categoryName']); ?></span></td>
         <td style="text-align:center;font-weight:700;"><?php echo $r['total_sold']; ?></td>
-        <td style="text-align:right;color:var(--text-muted);">₱<?php echo number_format($r['avg_price'],2); ?></td>
+        <td style="text-align:right;color:var(--t-muted);">₱<?php echo number_format($r['avg_price'],2); ?></td>
         <td style="text-align:right;" class="amt-main">₱<?php echo number_format($r['revenue'],2); ?></td>
       </tr>
       <?php endwhile; ?>
@@ -416,34 +438,38 @@ $types = [
     </div>
   </div>
 
-  <!-- ══════════════ INVENTORY ══════════════ -->
-  <?php elseif($report === 'inventory'):
-    $data = $conn->query("SELECT p.*, c.categoryName FROM product p JOIN category c ON p.categoryID=c.categoryID WHERE p.status='Active' ORDER BY p.stock_quantity ASC");
+  <!-- ══════════════ ORDER TYPE MIX ══════════════ -->
+  <?php elseif($report === 'order_type'):
+    $data    = $conn->query("SELECT orderType, COUNT(*) AS cnt, SUM(total_amount) AS revenue, AVG(total_amount) AS avg_check, SUM(pax) AS total_pax FROM orders WHERE status='Paid' AND DATE(datePaid) BETWEEN '$dateFrom' AND '$dateTo' GROUP BY orderType ORDER BY revenue DESC");
+    $_grq    = $conn->query("SELECT COALESCE(SUM(total_amount),0) AS t FROM orders WHERE status=\'Paid\' AND DATE(datePaid) BETWEEN \'$dateFrom\' AND \'$dateTo\'");
+    $grandRev= $_grq ? (float)$_grq->fetch_assoc()['t'] : 0;
+    $rows = []; while($r=$data->fetch_assoc()) $rows[] = $r;
   ?>
   <div class="main-card">
-    <div class="main-card-header"><i class="bi bi-table"></i> Inventory Status</div>
-    <div class="dt-controls" id="dt-search-area"></div>
-    <div style="overflow-x:auto;">
-    <table id="reportTable">
-      <thead><tr><th>Product</th><th>Category</th><th>Stock</th><th>Reorder Lvl</th><th>Cost</th><th>Price</th><th>Expiry</th><th>Status</th></tr></thead>
+    <div class="main-card-header"><i class="bi bi-pie-chart"></i> Order Type Breakdown</div>
+    <div style="padding:16px;">
+    <table id="reportTable" style="width:100%;">
+      <thead><tr><th>Order Type</th><th>Orders</th><th>Total Pax</th><th>Avg Check</th><th>Revenue</th><th>% Share</th></tr></thead>
       <tbody>
-      <?php while($r=$data->fetch_assoc()):
-        $st  = $r['stock_quantity']==0 ? 'OUT' : ($r['stock_quantity']<=$r['reorder_level'] ? 'LOW' : 'OK');
-        $cls = $st==='OUT' ? 'stock-out' : ($st==='LOW' ? 'stock-low' : 'stock-ok');
-        $icon= $st==='OUT' ? 'bi-x-circle-fill' : ($st==='LOW' ? 'bi-exclamation-triangle-fill' : 'bi-check-circle-fill');
-      ?>
+      <?php foreach($rows as $r): $share = $grandRev > 0 ? round(($r['revenue']/$grandRev)*100,1) : 0; ?>
       <tr>
-        <td style="font-weight:600;"><?php echo htmlspecialchars($r['productName']); ?></td>
-        <td><span class="cat-pill"><?php echo htmlspecialchars($r['categoryName']); ?></span></td>
-        <td style="text-align:center;font-weight:700;"><?php echo $r['stock_quantity']; ?></td>
-        <td style="text-align:center;color:var(--text-muted);"><?php echo $r['reorder_level']; ?></td>
-        <td style="text-align:right;color:var(--text-muted);">₱<?php echo number_format($r['cost'],2); ?></td>
-        <td style="text-align:right;" class="amt-main">₱<?php echo number_format($r['price'],2); ?></td>
-        <td style="font-size:.82rem;color:var(--text-muted);"><?php echo $r['expiry_date'] ? date('M d, Y',strtotime($r['expiry_date'])) : '—'; ?></td>
-        <td><span class="<?php echo $cls; ?>"><i class="bi <?php echo $icon; ?>" style="font-size:.68rem;"></i> <?php echo $st; ?></span></td>
+        <td style="font-weight:600;"><?php echo htmlspecialchars($r['orderType']); ?></td>
+        <td style="text-align:center;font-weight:700;"><?php echo $r['cnt']; ?></td>
+        <td style="text-align:center;"><?php echo number_format($r['total_pax']); ?></td>
+        <td style="text-align:right;">₱<?php echo number_format($r['avg_check'],2); ?></td>
+        <td style="text-align:right;" class="amt-main">₱<?php echo number_format($r['revenue'],2); ?></td>
+        <td style="text-align:center;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="flex:1;height:8px;background:#f0eef8;border-radius:4px;overflow:hidden;min-width:60px;">
+              <div style="height:100%;width:<?php echo $share; ?>%;background:#1A1A1A;border-radius:4px;"></div>
+            </div>
+            <span style="font-weight:700;font-size:.82rem;"><?php echo $share; ?>%</span>
+          </div>
+        </td>
       </tr>
-      <?php endwhile; ?>
+      <?php endforeach; ?>
       </tbody>
+      <tfoot><tr><td>TOTAL</td><td style="text-align:center;"><?php echo array_sum(array_column($rows,'cnt')); ?></td><td></td><td></td><td style="text-align:right;" class="amt-main">₱<?php echo number_format($grandRev,2); ?></td><td></td></tr></tfoot>
     </table>
     </div>
   </div>
@@ -451,7 +477,8 @@ $types = [
   <!-- ══════════════ EXPENSES ══════════════ -->
   <?php elseif($report === 'expenses'):
     $data     = $conn->query("SELECT e.*, ec.categoryName, CONCAT(u.givenName,' ',u.surName) AS byUser FROM expense e JOIN expense_category ec ON e.expenseCategoryID=ec.expenseCategoryID JOIN users u ON e.userID=u.userID WHERE e.expense_date BETWEEN '$dateFrom' AND '$dateTo' ORDER BY e.expense_date DESC");
-    $totalExp = $conn->query("SELECT COALESCE(SUM(amount),0) AS t FROM expense WHERE expense_date BETWEEN '$dateFrom' AND '$dateTo'")->fetch_assoc()['t'];
+    $_eq      = $conn->query("SELECT COALESCE(SUM(amount),0) AS t FROM expense WHERE expense_date BETWEEN \'$dateFrom\' AND \'$dateTo\'");
+    $totalExp = $_eq ? (float)$_eq->fetch_assoc()['t'] : 0;
   ?>
   <div class="exp-banner">
     <i class="bi bi-wallet2"></i>
@@ -464,13 +491,13 @@ $types = [
     <table id="reportTable">
       <thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Amount</th><th>Recorded By</th></tr></thead>
       <tbody>
-      <?php while($r=$data->fetch_assoc()): ?>
+      <?php while($data && ($r=$data->fetch_assoc())): ?>
       <tr>
-        <td style="font-size:.83rem;color:var(--text-muted);"><?php echo date('M d, Y',strtotime($r['expense_date'])); ?></td>
+        <td style="font-size:.83rem;color:var(--t-muted);"><?php echo date('M d, Y',strtotime($r['expense_date'])); ?></td>
         <td><span class="cat-pill"><?php echo htmlspecialchars($r['categoryName']); ?></span></td>
         <td><?php echo htmlspecialchars($r['description']??'—'); ?></td>
         <td style="text-align:right;" class="amt-neg">₱<?php echo number_format($r['amount'],2); ?></td>
-        <td style="font-size:.8rem;color:var(--text-muted);"><?php echo htmlspecialchars($r['byUser']); ?></td>
+        <td style="font-size:.8rem;color:var(--t-muted);"><?php echo htmlspecialchars($r['byUser']); ?></td>
       </tr>
       <?php endwhile; ?>
       </tbody>
@@ -481,23 +508,28 @@ $types = [
 
   <!-- ══════════════ PROFIT / LOSS ══════════════ -->
   <?php elseif($report === 'profit'):
-    $salesData   = $conn->query("SELECT COALESCE(SUM(sd.sold_quantity*p.cost),0) AS cogs, COALESCE(SUM(sd.subtotal),0) AS revenue FROM sales_details sd JOIN product p ON sd.productID=p.productID JOIN sales s ON sd.salesID=s.salesID WHERE DATE(s.saleDate) BETWEEN '$dateFrom' AND '$dateTo'")->fetch_assoc();
-    $expTotal    = floatval($conn->query("SELECT COALESCE(SUM(amount),0) AS t FROM expense WHERE expense_date BETWEEN '$dateFrom' AND '$dateTo'")->fetch_assoc()['t']);
-    $grossProfit = $salesData['revenue'] - $salesData['cogs'];
-    $netProfit   = $grossProfit - $expTotal;
+    $_sq       = $conn->query("SELECT COALESCE(SUM(total_amount),0) AS revenue, COALESCE(SUM(discount_amount),0) AS discounts, COALESCE(SUM(service_charge),0) AS service_charge, COALESCE(SUM(tax_amount),0) AS tax FROM orders WHERE status=\'Paid\' AND DATE(datePaid) BETWEEN \'$dateFrom\' AND \'$dateTo\'");
+    $salesData = $_sq ? $_sq->fetch_assoc() : ['revenue'=>0,'discounts'=>0,'service_charge'=>0,'tax'=>0];
+    $_pq       = $conn->query("SELECT COALESCE(SUM(amount),0) AS t FROM expense WHERE expense_date BETWEEN \'$dateFrom\' AND \'$dateTo\'");
+    $expTotal  = $_pq ? floatval($_pq->fetch_assoc()['t']) : 0;
+
+    // FIX: net revenue = gross revenue - discounts + service charges
+    $netRevenue  = floatval($salesData['revenue']) - floatval($salesData['discounts']) + floatval($salesData['service_charge']);
+    $netProfit   = $netRevenue - $expTotal;
   ?>
   <div class="stat-row">
-    <div class="stat-card-rp"><div class="stat-icon-rp ic-purple"><i class="bi bi-cash-stack"></i></div><div><div class="stat-lbl-rp">Total Revenue</div><div class="stat-val-rp sm">₱<?php echo number_format($salesData['revenue'],2); ?></div></div></div>
-    <div class="stat-card-rp"><div class="stat-icon-rp ic-orange"><i class="bi bi-box-seam"></i></div><div><div class="stat-lbl-rp">Cost of Goods</div><div class="stat-val-rp sm">₱<?php echo number_format($salesData['cogs'],2); ?></div></div></div>
-    <div class="stat-card-rp"><div class="stat-icon-rp <?php echo $grossProfit>=0?'ic-green':'ic-red'; ?>"><i class="bi bi-graph-up-arrow"></i></div><div><div class="stat-lbl-rp">Gross Profit</div><div class="stat-val-rp sm <?php echo $grossProfit>=0?'amt-pos':'amt-neg'; ?>">₱<?php echo number_format($grossProfit,2); ?></div></div></div>
-    <div class="stat-card-rp"><div class="stat-icon-rp <?php echo $netProfit>=0?'ic-teal':'ic-red'; ?>"><i class="bi bi-bar-chart-line-fill"></i></div><div><div class="stat-lbl-rp">Net Profit</div><div class="stat-val-rp sm <?php echo $netProfit>=0?'amt-pos':'amt-neg'; ?>">₱<?php echo number_format($netProfit,2); ?></div></div></div>
+    <div class="stat-card-rp"><div class="stat-icon-rp ic-purple"><i class="bi bi-cash-stack"></i></div><div><div class="stat-lbl-rp">Gross Revenue</div><div class="stat-val-rp sm">₱<?php echo number_format($salesData['revenue'],2); ?></div></div></div>
+    <div class="stat-card-rp"><div class="stat-icon-rp ic-orange"><i class="bi bi-tag"></i></div><div><div class="stat-lbl-rp">Discounts Given</div><div class="stat-val-rp sm">₱<?php echo number_format($salesData['discounts'],2); ?></div></div></div>
+    <div class="stat-card-rp"><div class="stat-icon-rp ic-blue"><i class="bi bi-wallet2"></i></div><div><div class="stat-lbl-rp">Operating Expenses</div><div class="stat-val-rp sm">₱<?php echo number_format($expTotal,2); ?></div></div></div>
+    <div class="stat-card-rp"><div class="stat-icon-rp <?php echo $netProfit>=0?'ic-green':'ic-red'; ?>"><i class="bi bi-graph-up-arrow"></i></div><div><div class="stat-lbl-rp">Net Profit / Loss</div><div class="stat-val-rp sm <?php echo $netProfit>=0?'amt-pos':'amt-neg'; ?>">₱<?php echo number_format($netProfit,2); ?></div></div></div>
   </div>
   <div class="main-card">
     <div class="main-card-header"><i class="bi bi-calculator"></i> Profit &amp; Loss Statement</div>
     <table class="profit-table">
-      <tr><td class="label">Gross Revenue</td><td style="text-align:right;" class="amt-main">₱<?php echo number_format($salesData['revenue'],2); ?></td></tr>
-      <tr><td class="sub-label">– Cost of Goods Sold (COGS)</td><td style="text-align:right;" class="amt-neg">-₱<?php echo number_format($salesData['cogs'],2); ?></td></tr>
-      <tr class="separator"><td class="label">Gross Profit</td><td style="text-align:right;" class="<?php echo $grossProfit>=0?'amt-pos':'amt-neg'; ?>">₱<?php echo number_format($grossProfit,2); ?></td></tr>
+      <tr><td class="label">Gross Revenue (Paid Orders)</td><td style="text-align:right;" class="amt-main">₱<?php echo number_format($salesData['revenue'],2); ?></td></tr>
+      <tr><td class="sub-label">– Discounts Given</td><td style="text-align:right;" class="amt-neg">-₱<?php echo number_format($salesData['discounts'],2); ?></td></tr>
+      <tr><td class="sub-label">+ Service Charges</td><td style="text-align:right;" class="amt-pos">+₱<?php echo number_format($salesData['service_charge'],2); ?></td></tr>
+      <tr class="separator"><td class="label">Net Revenue</td><td style="text-align:right;" class="amt-pos">₱<?php echo number_format($netRevenue,2); ?></td></tr>
       <tr><td class="sub-label">– Operating Expenses</td><td style="text-align:right;" class="amt-neg">-₱<?php echo number_format($expTotal,2); ?></td></tr>
       <tr class="separator"><td>Net Profit / Loss</td><td style="text-align:right;" class="<?php echo $netProfit>=0?'amt-pos':'amt-neg'; ?>">₱<?php echo number_format($netProfit,2); ?></td></tr>
     </table>
@@ -505,16 +537,16 @@ $types = [
 
   <!-- ══════════════ CUSTOMER REPORT ══════════════ -->
   <?php elseif($report === 'customer'):
-    $data = $conn->query("SELECT c.customerName, c.contactNo, c.credit_balance, COUNT(s.salesID) AS purchases, COALESCE(SUM(s.total_amount),0) AS total_spent FROM customer c LEFT JOIN sales s ON c.customerID=s.customerID AND DATE(s.saleDate) BETWEEN '$dateFrom' AND '$dateTo' WHERE c.dateDeleted IS NULL GROUP BY c.customerID ORDER BY total_spent DESC");
+    $data = $conn->query("SELECT c.customerName, c.contactNo, c.credit_balance, COUNT(o.orderID) AS visits, COALESCE(SUM(o.total_amount),0) AS total_spent FROM customer c LEFT JOIN orders o ON c.customerID=o.customerID AND o.status='Paid' AND DATE(o.datePaid) BETWEEN '$dateFrom' AND '$dateTo' WHERE c.dateDeleted IS NULL GROUP BY c.customerID ORDER BY total_spent DESC");
   ?>
   <div class="main-card">
-    <div class="main-card-header"><i class="bi bi-table"></i> Customer Activity</div>
+    <div class="main-card-header"><i class="bi bi-table"></i> Customer Visit Report</div>
     <div class="dt-controls" id="dt-search-area"></div>
     <div style="overflow-x:auto;">
     <table id="reportTable">
-      <thead><tr><th>Customer</th><th>Contact</th><th>Purchases</th><th>Total Spent</th><th>Credit Balance</th></tr></thead>
+      <thead><tr><th>Customer</th><th>Contact</th><th>Visits</th><th>Total Spent</th><th>Credit Balance</th></tr></thead>
       <tbody>
-      <?php while($r=$data->fetch_assoc()): ?>
+      <?php while($data && ($r=$data->fetch_assoc())): ?>
       <tr>
         <td style="font-weight:600;"><?php echo htmlspecialchars($r['customerName']); ?></td>
         <td>
@@ -522,7 +554,7 @@ $types = [
           <span class="contact-chip"><i class="bi bi-telephone-fill" style="font-size:.7rem;"></i><?php echo htmlspecialchars($r['contactNo']); ?></span>
           <?php else: ?><span style="color:#ccc;">—</span><?php endif; ?>
         </td>
-        <td style="text-align:center;font-weight:700;"><?php echo $r['purchases']; ?></td>
+        <td style="text-align:center;font-weight:700;"><?php echo $r['visits']; ?></td>
         <td style="text-align:right;" class="amt-main">₱<?php echo number_format($r['total_spent'],2); ?></td>
         <td style="text-align:right;" class="<?php echo $r['credit_balance']>0?'amt-neg':'amt-pos'; ?>">₱<?php echo number_format($r['credit_balance'],2); ?></td>
       </tr>
@@ -562,7 +594,12 @@ function exportExcel(){
   if(!tbl){ alert('No table to export'); return; }
   const ws = XLSX.utils.table_to_sheet(tbl);
   XLSX.utils.book_append_sheet(wb, ws, 'Report');
-  XLSX.writeFile(wb, '7evelyn_report_<?php echo $report; ?>_<?php echo $dateFrom; ?>_<?php echo $dateTo; ?>.xlsx');
+  const prefix = '<?php echo addslashes($exportPrefix); ?>';
+  const report = '<?php echo $report; ?>';
+  const from   = '<?php echo $dateFrom; ?>';
+  const to     = '<?php echo $dateTo; ?>';
+  XLSX.writeFile(wb, `${prefix}_report_${report}_${from}_${to}.xlsx`);
 }
 </script>
+<?php include 'footer.php'; ?>
 </body></html>

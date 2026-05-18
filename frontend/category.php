@@ -2,10 +2,10 @@
 require_once '../backend/database.php';
 require_once '../backend/pusher.php';
 
-session_start();
+if (session_status() === PHP_SESSION_NONE) { session_start(); }
 if(!isset($_SESSION['userID'])){ header("Location: ../index.php"); exit(); }
-if(!in_array($_SESSION['roleName'], ['Admin','Owner'])){ header("Location: dashboard.php"); exit(); }
-$pageTitle = "Categories – 7Evelyn POS";
+if(!in_array($_SESSION['roleName'], ['Admin'])){ header("Location: dashboard.php"); exit(); }
+$pageTitle = "Categories – Beng's Unli Lugaw";
 ?>
 <?php include 'header.php'; ?>
 <?php include 'nav.php'; ?>
@@ -16,7 +16,6 @@ $pageTitle = "Categories – 7Evelyn POS";
 
 .page-body {
     background: var(--c-ice);
-    min-height: calc(100vh - 64px);
     padding: 36px 24px 48px;
 }
 
@@ -45,27 +44,31 @@ $pageTitle = "Categories – 7Evelyn POS";
     border-radius: 3px;
 }
 
-/* ── Add Button ── */
+/* ── Add Button (Category page) ──
+   Follows system pattern: charcoal bg + orange accent.
+   Only Admin / Owner reach this page (see PHP role gate above). */
 .btn-add {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: var(--c-gold);
-    color: var(--c-navy);
+    background: var(--charcoal);
+    color: var(--orange);
     font-weight: 700;
     font-size: .88rem;
-    padding: 10px 22px;
+    padding: 9px 20px;
     border: none;
     border-radius: var(--r-md);
     box-shadow: var(--sh-sm);
     cursor: pointer;
     transition: background .18s, transform .15s, box-shadow .18s;
     letter-spacing: .01em;
+    font-family: var(--font-ui);
 }
 .btn-add:hover {
-    background: var(--c-gold-dark);
+    background: var(--charcoal-mid);
+    color: var(--orange);
     transform: translateY(-1px);
-    box-shadow: var(--sh-gold);
+    box-shadow: 0 4px 14px rgba(26,26,26,0.28);
 }
 .btn-add i { font-size: 1rem; }
 
@@ -253,39 +256,59 @@ $pageTitle = "Categories – 7Evelyn POS";
 .del-confirm-box i { color: var(--c-danger); font-size: 1.3rem; margin-top: 2px; flex-shrink: 0; }
 .del-confirm-box p { margin: 0; color: var(--t-main); font-size: .88rem; line-height: 1.5; }
 
-/* ── DataTable Overrides ── */
-.dataTables_wrapper .dataTables_filter input {
-    border: 1.5px solid var(--s-border-dark);
-    border-radius: var(--r-xs);
-    padding: 6px 12px;
-    font-size: .85rem;
-    outline: none;
-    transition: border .18s;
+/* ── DataTable Overrides — category.php ── */
+div.dataTables_wrapper div.dataTables_filter input {
+    border: 1.5px solid var(--s-border) !important;
+    border-radius: var(--r-sm) !important;
+    padding: 6px 12px !important;
+    font-size: .85rem !important;
+    outline: none !important;
+    transition: border .18s !important;
+    font-family: var(--font-ui) !important;
 }
-.dataTables_wrapper .dataTables_filter input:focus {
-    border-color: var(--c-gold);
+div.dataTables_wrapper div.dataTables_filter input:focus {
+    border-color: var(--orange) !important;
 }
-.dataTables_wrapper .dataTables_length select {
-    border: 1.5px solid var(--s-border-dark);
-    border-radius: var(--r-xs);
-    padding: 5px 8px;
+div.dataTables_wrapper div.dataTables_length select {
+    border: 1.5px solid var(--s-border) !important;
+    border-radius: var(--r-sm) !important;
+    padding: 5px 8px !important;
+    font-family: var(--font-ui) !important;
 }
-.dataTables_wrapper .dataTables_info,
-.dataTables_wrapper .dataTables_length { color: var(--t-muted); font-size: .82rem; }
-.dataTables_wrapper .paginate_button {
-    border-radius: var(--r-xs) !important;
+div.dataTables_wrapper div.dataTables_info,
+div.dataTables_wrapper div.dataTables_length { color: var(--t-muted) !important; font-size: .82rem !important; }
+
+/* Pagination — matches system: charcoal active, orange text */
+div.dataTables_wrapper div.dataTables_paginate .paginate_button {
+    border-radius: 7px !important;
     font-size: .82rem !important;
+    font-weight: 600 !important;
+    min-width: 32px !important;
+    text-align: center !important;
+    border: 1.5px solid var(--s-border) !important;
+    background: var(--c-white) !important;
+    color: var(--t-mid) !important;
+    margin: 0 2px !important;
 }
-.dataTables_wrapper .paginate_button.current,
-.dataTables_wrapper .paginate_button.current:hover {
-    background: var(--c-navy) !important;
-    color: var(--c-gold) !important;
-    border-color: var(--c-navy) !important;
+div.dataTables_wrapper div.dataTables_paginate .paginate_button.current,
+div.dataTables_wrapper div.dataTables_paginate .paginate_button.current:hover {
+    background: var(--charcoal) !important;
+    color: var(--orange) !important;
+    border-color: var(--charcoal) !important;
+    font-weight: 700 !important;
 }
-.dataTables_wrapper .paginate_button:hover:not(.current) {
-    background: var(--c-gold-soft) !important;
-    color: var(--c-navy) !important;
-    border-color: var(--c-gold-soft) !important;
+div.dataTables_wrapper div.dataTables_paginate .paginate_button:hover:not(.current):not(.disabled) {
+    background: var(--orange-soft) !important;
+    color: var(--orange-dark) !important;
+    border-color: var(--orange) !important;
+}
+div.dataTables_wrapper div.dataTables_paginate .paginate_button.disabled,
+div.dataTables_wrapper div.dataTables_paginate .paginate_button.disabled:hover {
+    background: transparent !important;
+    color: var(--t-muted) !important;
+    border-color: var(--s-border) !important;
+    opacity: .4 !important;
+    cursor: default !important;
 }
 
 @media (max-width: 576px) {
@@ -471,8 +494,6 @@ foreach($alerts as $k => [$i, $t, $tx])
 </div>
 <?php endif; ?>
 
-</div></div>
-
 <script>
 $(document).ready(function(){
     $('#catTable').DataTable({
@@ -496,4 +517,5 @@ $(document).ready(function(){
     const PUSHER_CLUSTER = '<?php echo defined("PUSHER_APP_CLUSTER") ? PUSHER_APP_CLUSTER : ""; ?>';
 </script>
 <script src="pusher-content/realtime.js"></script>
+<?php include 'footer.php'; ?>
 </body></html>

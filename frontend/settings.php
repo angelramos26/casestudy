@@ -1,10 +1,10 @@
 <?php
 require_once '../backend/database.php';
 require_once '../backend/pusher.php';
-session_start();
+if (session_status() === PHP_SESSION_NONE) { session_start(); }
 if(!isset($_SESSION['userID'])){ header("Location: ../index.php"); exit(); }
 if($_SESSION['roleName'] !== 'Admin'){ header("Location: dashboard.php"); exit(); }
-$pageTitle = "Settings – 7Evelyn POS";
+$pageTitle = "Settings – Beng's Unli Lugaw";
 ?>
 <?php include 'header.php'; ?>
 <?php include 'nav.php'; ?>
@@ -22,13 +22,13 @@ $pageTitle = "Settings – 7Evelyn POS";
     border-radius: 50px;
     padding: .32rem .8rem .32rem .5rem;
     font-size: .78rem;
-    color: var(--navy);
+    color: var(--charcoal);
     font-weight: 600;
 }
-.user-badge i { color: var(--navy-light); font-size: 1.1rem; }
+.user-badge i { color: var(--charcoal-light); font-size: 1.1rem; }
 .role-pill {
-    background: var(--navy);
-    color: var(--gold);
+    background: var(--charcoal);
+    color: var(--orange);
     font-size: .68rem;
     font-weight: 700;
     padding: .15rem .55rem;
@@ -53,7 +53,7 @@ $pageTitle = "Settings – 7Evelyn POS";
     font-weight: 700;
     letter-spacing: .1em;
     text-transform: uppercase;
-    color: var(--text-muted);
+    color: var(--t-muted);
     margin-bottom: 1rem;
     margin-top: .25rem;
 }
@@ -67,16 +67,16 @@ $pageTitle = "Settings – 7Evelyn POS";
 
 /* ── Settings Card ─────────────────────────────────────────────────────── */
 .s-card {
-    background: var(--white);
-    border-radius: var(--radius-lg);
+    background: var(--c-white);
+    border-radius: var(--r-lg);
     border: 1.5px solid var(--border);
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--sh-sm);
     overflow: hidden;
     transition: var(--transition);
     margin-bottom: 1.4rem;
 }
 .s-card:hover {
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--sh-md);
     border-color: #d9d5f0;
 }
 .s-card-header {
@@ -89,22 +89,22 @@ $pageTitle = "Settings – 7Evelyn POS";
 }
 .s-card-header .hdr-icon {
     width: 36px; height: 36px;
-    background: var(--gold);
-    border-radius: var(--radius-sm);
+    background: var(--orange);
+    border-radius: var(--r-sm);
     display: flex; align-items: center; justify-content: center;
-    color: var(--navy);
+    color: var(--charcoal);
     font-size: 1.05rem;
     flex-shrink: 0;
 }
 .s-card-header .hdr-title {
     font-size: .92rem;
     font-weight: 700;
-    color: var(--navy);
+    color: var(--charcoal);
     letter-spacing: -.01em;
 }
 .s-card-header .hdr-desc {
     font-size: .75rem;
-    color: var(--text-muted);
+    color: var(--t-muted);
     margin-top: .05rem;
 }
 .s-card-body {
@@ -118,20 +118,20 @@ $pageTitle = "Settings – 7Evelyn POS";
     gap: 1.2rem;
     padding: 1.1rem 1.3rem;
     background: var(--mint);
-    border-radius: var(--radius-md);
+    border-radius: var(--r-md);
     border: 1.5px dashed var(--mint-dark);
     margin-bottom: 1.2rem;
     transition: var(--transition);
 }
 .logo-upload-zone:hover {
-    border-color: var(--gold-dark);
-    background: var(--gold-soft);
+    border-color: var(--orange-dark);
+    background: var(--orange-soft);
 }
 .logo-thumb {
     width: 72px; height: 72px;
-    border-radius: var(--radius-md);
+    border-radius: var(--r-md);
     border: 2px solid var(--border);
-    background: var(--white);
+    background: var(--c-white);
     display: flex; align-items: center; justify-content: center;
     overflow: hidden;
     flex-shrink: 0;
@@ -141,7 +141,7 @@ $pageTitle = "Settings – 7Evelyn POS";
 .logo-actions { flex: 1; }
 .logo-actions .logo-hint {
     font-size: .72rem;
-    color: var(--text-muted);
+    color: var(--t-muted);
     margin-top: .5rem;
 }
 
@@ -151,28 +151,28 @@ $pageTitle = "Settings – 7Evelyn POS";
     display: block;
     font-size: .78rem;
     font-weight: 700;
-    color: var(--navy);
+    color: var(--charcoal);
     margin-bottom: .35rem;
     letter-spacing: -.005em;
 }
 .field-group .form-control {
     border: 1.5px solid var(--border);
-    border-radius: var(--radius-sm);
+    border-radius: var(--r-sm);
     padding: .58rem .85rem;
     font-size: .85rem;
     color: var(--text-main);
-    background: var(--white);
+    background: var(--c-white);
     transition: var(--transition);
     box-shadow: none;
 }
 .field-group .form-control:focus {
-    border-color: var(--gold-dark);
-    box-shadow: 0 0 0 3px rgba(249,217,74,.18);
+    border-color: var(--orange-dark);
+    box-shadow: 0 0 0 3px rgba(239,130,13,.18);
     outline: none;
 }
 .field-group .field-hint {
     font-size: .72rem;
-    color: var(--text-muted);
+    color: var(--t-muted);
     margin-top: .3rem;
 }
 
@@ -182,7 +182,7 @@ $pageTitle = "Settings – 7Evelyn POS";
     align-items: center;
     justify-content: space-between;
     padding: .8rem 1rem;
-    border-radius: var(--radius-sm);
+    border-radius: var(--r-sm);
     background: var(--mint);
     border: 1.5px solid var(--mint-dark);
     margin-bottom: .7rem;
@@ -191,11 +191,11 @@ $pageTitle = "Settings – 7Evelyn POS";
 .toggle-row-text .toggle-title {
     font-size: .83rem;
     font-weight: 700;
-    color: var(--navy);
+    color: var(--charcoal);
 }
 .toggle-row-text .toggle-sub {
     font-size: .72rem;
-    color: var(--text-muted);
+    color: var(--t-muted);
     margin-top: .05rem;
 }
 .form-check-input[type=checkbox] {
@@ -208,17 +208,17 @@ $pageTitle = "Settings – 7Evelyn POS";
     flex-shrink: 0;
 }
 .form-check-input[type=checkbox]:checked {
-    background-color: var(--navy);
-    border-color: var(--navy);
+    background-color: var(--charcoal);
+    border-color: var(--charcoal);
 }
-.form-check-input:focus { box-shadow: 0 0 0 3px rgba(38,35,65,.12); }
+.form-check-input:focus { box-shadow: 0 0 0 3px rgba(26,26,26,.12); }
 
 /* ── Buttons ───────────────────────────────────────────────────────────── */
 .btn-gold {
-    background: var(--gold);
-    color: var(--navy);
-    border: 1.5px solid var(--gold-dark);
-    border-radius: var(--radius-sm);
+    background: var(--orange);
+    color: var(--charcoal);
+    border: 1.5px solid var(--orange-dark);
+    border-radius: var(--r-sm);
     font-size: .82rem;
     font-weight: 700;
     padding: .55rem 1.1rem;
@@ -228,16 +228,16 @@ $pageTitle = "Settings – 7Evelyn POS";
     letter-spacing: -.01em;
 }
 .btn-gold:hover {
-    background: var(--gold-dark);
-    color: var(--navy);
-    box-shadow: 0 4px 14px rgba(249,217,74,.4);
+    background: var(--orange-dark);
+    color: var(--charcoal);
+    box-shadow: 0 4px 14px rgba(239,130,13,.4);
     transform: translateY(-1px);
 }
 .btn-gold-outline {
     background: transparent;
-    color: var(--navy);
+    color: var(--charcoal);
     border: 1.5px solid var(--border);
-    border-radius: var(--radius-sm);
+    border-radius: var(--r-sm);
     font-size: .82rem;
     font-weight: 600;
     padding: .55rem 1.1rem;
@@ -246,15 +246,15 @@ $pageTitle = "Settings – 7Evelyn POS";
     cursor: pointer;
 }
 .btn-gold-outline:hover {
-    border-color: var(--navy);
+    border-color: var(--charcoal);
     background: var(--mint);
-    color: var(--navy);
+    color: var(--charcoal);
 }
 .btn-danger-outline {
     background: transparent;
     color: #d93025;
     border: 1.5px solid #f4c2bf;
-    border-radius: var(--radius-sm);
+    border-radius: var(--r-sm);
     font-size: .82rem;
     font-weight: 600;
     padding: .55rem 1.1rem;
@@ -279,8 +279,8 @@ $pageTitle = "Settings – 7Evelyn POS";
 .sysinfo-table tr { border-bottom: 1px solid var(--border); }
 .sysinfo-table tr:last-child { border-bottom: none; }
 .sysinfo-table td { padding: .62rem .25rem; font-size: .82rem; vertical-align: middle; }
-.sysinfo-table td:first-child { color: var(--text-muted); width: 130px; font-weight: 500; }
-.sysinfo-table td:last-child { font-weight: 600; color: var(--navy); }
+.sysinfo-table td:first-child { color: var(--t-muted); width: 130px; font-weight: 500; }
+.sysinfo-table td:last-child { font-weight: 600; color: var(--charcoal); }
 .status-dot {
     display: inline-flex; align-items: center; gap: .35rem;
 }
@@ -296,9 +296,9 @@ $pageTitle = "Settings – 7Evelyn POS";
 .danger-card {
     background: #fff8f8;
     border: 1.5px solid #f4c2bf;
-    border-radius: var(--radius-lg);
+    border-radius: var(--r-lg);
     overflow: hidden;
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--sh-sm);
 }
 .danger-header {
     display: flex;
@@ -311,7 +311,7 @@ $pageTitle = "Settings – 7Evelyn POS";
 .danger-header .hdr-icon {
     width: 34px; height: 34px;
     background: #f4c2bf;
-    border-radius: var(--radius-sm);
+    border-radius: var(--r-sm);
     display: flex; align-items: center; justify-content: center;
     color: #d93025; font-size: 1rem;
 }
@@ -324,8 +324,8 @@ $pageTitle = "Settings – 7Evelyn POS";
     gap: 1.5rem;
     flex-wrap: wrap;
 }
-.danger-desc .danger-title { font-size: .85rem; font-weight: 700; color: var(--navy); }
-.danger-desc .danger-sub { font-size: .75rem; color: var(--text-muted); margin-top: .2rem; }
+.danger-desc .danger-title { font-size: .85rem; font-weight: 700; color: var(--charcoal); }
+.danger-desc .danger-sub { font-size: .75rem; color: var(--t-muted); margin-top: .2rem; }
 
 /* ── Divider ───────────────────────────────────────────────────────────── */
 .settings-divider {
@@ -350,14 +350,14 @@ input[type="file"].form-control-sm {
     font-size: .78rem;
     padding: .3rem .6rem;
     border: 1.5px solid var(--border);
-    border-radius: var(--radius-sm);
-    background: var(--white);
+    border-radius: var(--r-sm);
+    background: var(--c-white);
     color: var(--text-main);
     cursor: pointer;
     transition: var(--transition);
 }
 input[type="file"].form-control-sm:focus {
-    border-color: var(--gold-dark);
+    border-color: var(--orange-dark);
     outline: none;
 }
 </style>
@@ -408,7 +408,7 @@ include 'topbar.php';
                     <!-- Store Name -->
                     <div class="field-group">
                         <label for="storeNameInput">Store / Business Name</label>
-                        <input type="text" id="storeNameInput" class="form-control" placeholder="e.g. 7Evelyn Store" maxlength="60">
+                        <input type="text" id="storeNameInput" class="form-control" placeholder="e.g. Beng's Unli Lugaw" maxlength="60">
                         <div class="field-hint">Shown in the sidebar and on printed receipts.</div>
                     </div>
 
@@ -471,7 +471,7 @@ include 'topbar.php';
             <div class="section-label" style="margin-top:1.4rem;"><i class="bi bi-cpu"></i> System</div>
             <div class="s-card">
                 <div class="s-card-header">
-                    <div class="hdr-icon" style="background:var(--mint-dark);color:var(--navy-mid);"><i class="bi bi-info-circle"></i></div>
+                    <div class="hdr-icon" style="background:var(--mint-dark);color:var(--charcoal-mid);"><i class="bi bi-info-circle"></i></div>
                     <div>
                         <div class="hdr-title">System Information</div>
                         <div class="hdr-desc">Environment and session details</div>
@@ -482,7 +482,7 @@ include 'topbar.php';
                         <tbody>
                             <tr>
                                 <td>System</td>
-                                <td>7Evelyn POS</td>
+                                <td>Beng's Unli Lugaw</td>
                             </tr>
                             <tr>
                                 <td>Logged in as</td>
@@ -553,6 +553,8 @@ document.addEventListener('DOMContentLoaded', function(){
 });
 
 // ── Logo handling ──────────────────────────────────────────────────────────
+let currentLogoBase64 = null; // holds the raw base64 from FileReader
+
 document.getElementById('logoFileInput').addEventListener('change', function(){
     const file = this.files[0];
     if(!file) return;
@@ -561,7 +563,10 @@ document.getElementById('logoFileInput').addEventListener('change', function(){
         this.value = ''; return;
     }
     const reader = new FileReader();
-    reader.onload = e => showLogoPreview(e.target.result);
+    reader.onload = e => {
+        currentLogoBase64 = e.target.result; // store base64 separately
+        showLogoPreview(e.target.result);
+    };
     reader.readAsDataURL(file);
 });
 
@@ -572,8 +577,9 @@ function showLogoPreview(src){
 }
 
 function saveLogo(){
-    const src = document.getElementById('logoPreview').src;
-    if(!src || document.getElementById('logoPreview').style.display === 'none'){
+    // use newly selected base64, or fall back to what's already in localStorage
+    const src = currentLogoBase64 || localStorage.getItem('ev_store_logo');
+    if(!src){
         Swal.fire({icon:'warning',title:'No logo selected',text:'Please choose an image first.',timer:2000});
         return;
     }
@@ -582,6 +588,7 @@ function saveLogo(){
     const sidebarIcon = document.getElementById('sidebarLogoIcon');
     if(sidebarImg){ sidebarImg.src = src; sidebarImg.style.display='block'; }
     if(sidebarIcon){ sidebarIcon.style.display='none'; }
+    currentLogoBase64 = null; // reset after save
     Swal.fire({icon:'success',title:'Logo Saved!',timer:1500,showConfirmButton:false});
 }
 
@@ -610,7 +617,7 @@ function saveBranding(){
     else localStorage.removeItem('ev_store_tagline');
 
     const brandEl = document.getElementById('sidebarBrandName');
-    if(brandEl) brandEl.textContent = name || '7Evelyn';
+    if(brandEl) brandEl.textContent = name || "Beng's Unli Lugaw";
 
     Swal.fire({icon:'success',title:'Branding Saved!',timer:1500,showConfirmButton:false});
 }
@@ -657,4 +664,5 @@ function clearAllSettings(){
     const PUSHER_CLUSTER = '<?php echo defined("PUSHER_APP_CLUSTER") ? PUSHER_APP_CLUSTER : ""; ?>';
 </script>
 <script src="pusher-content/realtime.js"></script>
+<?php include 'footer.php'; ?>
 </body></html>

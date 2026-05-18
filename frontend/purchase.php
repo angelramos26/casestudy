@@ -2,11 +2,11 @@
 require_once '../backend/database.php';
 require_once '../backend/pusher.php';
 
-session_start();
+if (session_status() === PHP_SESSION_NONE) { session_start(); }
 if(!isset($_SESSION['userID'])){ header("Location: ../index.php"); exit(); }
 if(!in_array($_SESSION['roleName'], ['Admin','Owner'])){ header("Location: dashboard.php"); exit(); }
 
-$pageTitle = "Purchase Orders – 7Evelyn POS";
+$pageTitle = "Purchase Orders – Beng's Unli Lugaw";
 
 $suppliers = $conn->query("SELECT supplierID, companyName FROM supplier WHERE dateDeleted IS NULL ORDER BY companyName");
 $products  = $conn->query("SELECT productID, productName, cost FROM product WHERE status='Active' ORDER BY productName");
@@ -53,12 +53,12 @@ $pos = $conn->query($sql);
 /* ── Stat cards ───────────────────────────── */
 .stat-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 24px; }
 .stat-card {
-  background: var(--card-bg); border-radius: var(--radius-lg);
+  background: var(--card-bg); border-radius: var(--r-lg);
   padding: 20px 22px; display: flex; align-items: center; gap: 16px;
   box-shadow: var(--shadow-card); border: 1.5px solid var(--border);
   transition: transform .18s, box-shadow .18s;
 }
-.stat-card:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(38,35,65,.12); }
+.stat-card:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(26,26,26,.12); }
 .stat-icon-box {
   width: 48px; height: 48px; border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
@@ -66,15 +66,15 @@ $pos = $conn->query($sql);
 }
 .ic-orange { background: #fff7ed; color: #c05621; }
 .ic-blue   { background: #ebf4ff; color: #2b6cb0; }
-.ic-red    { background: #fff5f5; color: var(--danger); }
-.ic-green  { background: #f0fff4; color: var(--success); }
-.stat-label { font-size: .72rem; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: .05em; }
+.ic-red    { background: #fff5f5; color: var(--c-danger); }
+.ic-green  { background: #f0fff4; color: var(--c-success); }
+.stat-label { font-size: .72rem; color: var(--t-muted); font-weight: 500; text-transform: uppercase; letter-spacing: .05em; }
 .stat-value { font-size: 1.55rem; font-weight: 800; color: var(--brand-navy); line-height: 1.1; }
 .stat-value.small-val { font-size: 1.15rem; }
 
 /* ── Main card ────────────────────────────── */
 .main-card {
-  background: var(--card-bg); border-radius: var(--radius-lg);
+  background: var(--card-bg); border-radius: var(--r-lg);
   box-shadow: var(--shadow-card); border: 1.5px solid var(--border);
   overflow: hidden;
 }
@@ -90,7 +90,7 @@ $pos = $conn->query($sql);
   display: inline-flex; align-items: center; gap: 7px;
   background: var(--brand-yellow); color: var(--brand-navy);
   font-weight: 700; font-size: .84rem;
-  border: none; border-radius: var(--radius-sm);
+  border: none; border-radius: var(--r-sm);
   padding: 9px 18px; cursor: pointer;
   transition: background .18s, transform .1s;
   box-shadow: var(--shadow-btn); text-decoration: none;
@@ -98,7 +98,7 @@ $pos = $conn->query($sql);
 .btn-add:hover { background: var(--brand-yellow-d); transform: translateY(-1px); color: var(--brand-navy); }
 
 .filter-select {
-  border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border); border-radius: var(--r-sm);
   padding: 7px 12px; font-size: .83rem; color: var(--text-main);
   background: var(--card-bg); cursor: pointer; outline: none;
   transition: border-color .15s;
@@ -138,48 +138,48 @@ $pos = $conn->query($sql);
   border-radius: 50px; padding: 4px 12px; font-size: .76rem; font-weight: 700;
 }
 .status-pending  { background: #fff7ed; color: #c05621; border: 1px solid #fbd38d; }
-.status-received { background: #f0fff4; color: var(--success); border: 1px solid #9ae6b4; }
-.status-cancelled{ background: #fff5f5; color: var(--danger); border: 1px solid #fed7d7; }
+.status-received { background: #f0fff4; color: var(--c-success); border: 1px solid #9ae6b4; }
+.status-cancelled{ background: #fff5f5; color: var(--c-danger); border: 1px solid #fed7d7; }
 
 /* ── Amount ───────────────────────────────── */
 .amount-cell { font-weight: 700; color: var(--brand-navy); }
 
 /* ── Notes cell ───────────────────────────── */
-.notes-cell { font-size: .78rem; color: var(--text-muted); max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.notes-cell { font-size: .78rem; color: var(--t-muted); max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* ── Action buttons ───────────────────────── */
 .action-group { display: flex; gap: 5px; justify-content: center; }
 .btn-action {
-  width: 32px; height: 32px; border-radius: var(--radius-sm);
+  width: 32px; height: 32px; border-radius: var(--r-sm);
   border: none; cursor: pointer;
   display: inline-flex; align-items: center; justify-content: center;
   font-size: .88rem; transition: opacity .15s, transform .1s;
 }
 .btn-action:hover { opacity: .82; transform: scale(1.08); }
 .btn-view    { background: #ebf4ff; color: var(--info); }
-.btn-receive { background: #f0fff4; color: var(--success); }
-.btn-cancel  { background: #fff5f5; color: var(--danger); }
+.btn-receive { background: #f0fff4; color: var(--c-success); }
+.btn-cancel  { background: #fff5f5; color: var(--c-danger); }
 
 /* ── DataTable overrides ──────────────────── */
 div.dataTables_wrapper div.dataTables_filter label,
-div.dataTables_wrapper div.dataTables_length label { color: var(--text-muted); font-size: .83rem; }
+div.dataTables_wrapper div.dataTables_length label { color: var(--t-muted); font-size: .83rem; }
 div.dataTables_wrapper div.dataTables_filter input,
 div.dataTables_wrapper div.dataTables_length select {
-  border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border); border-radius: var(--r-sm);
   padding: 5px 10px; font-size: .83rem; color: var(--text-main);
   background: var(--card-bg); outline: none;
 }
 div.dataTables_wrapper div.dataTables_filter input:focus { border-color: var(--brand-yellow); }
-div.dataTables_wrapper div.dataTables_paginate .paginate_button { border-radius: var(--radius-sm) !important; font-size: .8rem; }
+div.dataTables_wrapper div.dataTables_paginate .paginate_button { border-radius: var(--r-sm) !important; font-size: .8rem; }
 div.dataTables_wrapper div.dataTables_paginate .paginate_button.current,
 div.dataTables_wrapper div.dataTables_paginate .paginate_button.current:hover {
   background: var(--brand-navy) !important; color: #fff !important; border-color: var(--brand-navy) !important;
 }
-div.dataTables_wrapper .dataTables_info { color: var(--text-muted); font-size: .8rem; }
+div.dataTables_wrapper .dataTables_info { color: var(--t-muted); font-size: .8rem; }
 .dt-controls { padding: 16px 24px 10px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
 
 /* ── Modal ────────────────────────────────── */
-.modal-content { border-radius: var(--radius-lg); border: none; box-shadow: 0 8px 40px rgba(38,35,65,.18); overflow: hidden; }
+.modal-content { border-radius: var(--r-lg); border: none; box-shadow: 0 8px 40px rgba(26,26,26,.18); overflow: hidden; }
 .modal-header-brand {
   background: var(--brand-navy); color: #fff;
   padding: 18px 24px; display: flex; align-items: center; justify-content: space-between;
@@ -188,24 +188,24 @@ div.dataTables_wrapper .dataTables_info { color: var(--text-muted); font-size: .
 .modal-header-brand .btn-close { filter: brightness(0) invert(1); opacity: .7; }
 .modal-body  { padding: 22px 24px; }
 .modal-footer{ padding: 14px 24px; border-top: 1.5px solid var(--border); background: #fafafa; }
-.form-label-styled { font-size: .75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 5px; display: block; }
+.form-label-styled { font-size: .75rem; font-weight: 600; color: var(--t-muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 5px; display: block; }
 .form-control-styled {
-  border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border); border-radius: var(--r-sm);
   padding: 9px 13px; font-size: .88rem; color: var(--text-main);
   transition: border-color .15s, box-shadow .15s; width: 100%;
 }
-.form-control-styled:focus { outline: none; border-color: var(--brand-yellow); box-shadow: 0 0 0 3px rgba(249,217,74,.2); }
+.form-control-styled:focus { outline: none; border-color: var(--brand-yellow); box-shadow: 0 0 0 3px rgba(239,130,13,.2); }
 .btn-submit {
   background: var(--brand-yellow); color: var(--brand-navy);
-  font-weight: 700; border: none; border-radius: var(--radius-sm);
+  font-weight: 700; border: none; border-radius: var(--r-sm);
   padding: 9px 22px; font-size: .88rem; cursor: pointer;
   transition: background .15s;
 }
 .btn-submit:hover { background: var(--brand-yellow-d); }
 .btn-cancel-modal {
-  background: transparent; color: var(--text-muted);
+  background: transparent; color: var(--t-muted);
   font-weight: 600; border: 1.5px solid var(--border);
-  border-radius: var(--radius-sm); padding: 9px 18px; font-size: .88rem; cursor: pointer;
+  border-radius: var(--r-sm); padding: 9px 18px; font-size: .88rem; cursor: pointer;
   transition: border-color .15s;
 }
 .btn-cancel-modal:hover { border-color: #aaa; color: var(--text-main); }
@@ -265,7 +265,7 @@ div.dataTables_wrapper .dataTables_info { color: var(--text-muted); font-size: .
       <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
         <!-- Status filter -->
         <form method="GET" style="display:flex; align-items:center; gap:6px;">
-          <i class="bi bi-funnel" style="color:var(--text-muted); font-size:.9rem;"></i>
+          <i class="bi bi-funnel" style="color:var(--t-muted); font-size:.9rem;"></i>
           <select name="status" class="filter-select" onchange="this.form.submit()">
             <option value="">All Statuses</option>
             <option value="Pending"   <?php echo ($statusFilter==='Pending')   ? 'selected' : ''; ?>>Pending</option>
@@ -325,7 +325,7 @@ div.dataTables_wrapper .dataTables_info { color: var(--text-muted); font-size: .
               <span style="font-weight:600;"><?php echo htmlspecialchars($po['companyName']); ?></span>
             </div>
           </td>
-          <td style="font-size:.8rem; color:var(--text-muted);"><?php echo htmlspecialchars($po['createdBy']); ?></td>
+          <td style="font-size:.8rem; color:var(--t-muted);"><?php echo htmlspecialchars($po['createdBy']); ?></td>
           <td>
             <span class="status-pill <?php echo $pillClass; ?>">
               <i class="bi <?php echo $pillIcon; ?>" style="font-size:.68rem;"></i>
@@ -333,8 +333,8 @@ div.dataTables_wrapper .dataTables_info { color: var(--text-muted); font-size: .
             </span>
           </td>
           <td class="amount-cell">₱<?php echo number_format($po['total_amount'], 2); ?></td>
-          <td style="font-size:.82rem; color:var(--text-muted);"><?php echo date('M d, Y', strtotime($po['dateCreated'])); ?></td>
-          <td style="font-size:.82rem; color:var(--text-muted);"><?php echo $po['dateReceived'] ? date('M d, Y', strtotime($po['dateReceived'])) : '<span style="color:#ccc;">—</span>'; ?></td>
+          <td style="font-size:.82rem; color:var(--t-muted);"><?php echo date('M d, Y', strtotime($po['dateCreated'])); ?></td>
+          <td style="font-size:.82rem; color:var(--t-muted);"><?php echo $po['dateReceived'] ? date('M d, Y', strtotime($po['dateReceived'])) : '<span style="color:#ccc;">—</span>'; ?></td>
           <td><div class="notes-cell" title="<?php echo htmlspecialchars($po['notes'] ?? ''); ?>"><?php echo htmlspecialchars($po['notes'] ?? '—'); ?></div></td>
           <td>
             <div class="action-group">
@@ -425,4 +425,5 @@ $(document).ready(function(){
   const PUSHER_CLUSTER = '<?php echo defined("PUSHER_APP_CLUSTER") ? PUSHER_APP_CLUSTER : ""; ?>';
 </script>
 <script src="pusher-content/realtime.js"></script>
+<?php include 'footer.php'; ?>
 </body></html>

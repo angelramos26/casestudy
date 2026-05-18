@@ -2,11 +2,11 @@
 require_once '../backend/database.php';
 require_once '../backend/pusher.php';
 
-session_start();
+if (session_status() === PHP_SESSION_NONE) { session_start(); }
 if (!isset($_SESSION['userID'])) { header("Location: ../index.php"); exit(); }
 if ($_SESSION['roleName'] !== 'Admin') { header("Location: dashboard.php"); exit(); }
 
-$pageTitle = "User Management – 7Evelyn POS";
+$pageTitle = "User Management – Beng's Unli Lugaw";
 $roles = $conn->query("SELECT * FROM role WHERE dateDeleted IS NULL ORDER BY roleName");
 $users = $conn->query(
     "SELECT u.*, r.roleName FROM users u
@@ -38,9 +38,9 @@ $activeCount = $totalUsers;
 
 .um-breadcrumb {
     display: flex; align-items: center; gap: 6px;
-    font-size: 12px; color: var(--navy-light);
+    font-size: 12px; color: var(--charcoal-light);
 }
-.um-breadcrumb span { color: var(--gold); font-weight: 700; }
+.um-breadcrumb span { color: var(--orange); font-weight: 700; }
 .um-user-pill {
     margin-left: auto;
     display: flex; align-items: center; gap: 10px;
@@ -51,13 +51,13 @@ $activeCount = $totalUsers;
 }
 .um-user-avatar {
     width: 30px; height: 30px; border-radius: 50%;
-    background: var(--gold);
-    color: var(--navy);
+    background: var(--orange);
+    color: var(--charcoal);
     font-size: 11px; font-weight: 900;
     display: flex; align-items: center; justify-content: center;
 }
-.um-user-name { font-size: 13px; font-weight: 700; color: var(--white); }
-.um-user-role { font-size: 10.5px; color: var(--gold); font-weight: 700; letter-spacing: .4px; }
+.um-user-name { font-size: 13px; font-weight: 700; color: var(--c-white); }
+.um-user-role { font-size: 10.5px; color: var(--orange); font-weight: 700; letter-spacing: .4px; }
 
 /* ══════════════════════════════════
    MAIN CONTENT WRAPPER
@@ -82,37 +82,37 @@ $activeCount = $totalUsers;
 .um-page-header h1 {
     font-size: 1.75rem;
     font-weight: 900;
-    color: var(--navy);
+    color: var(--charcoal);
     margin: 0 0 4px;
     letter-spacing: -.4px;
 }
 .um-page-header p {
     font-size: 13.5px;
-    color: var(--text-muted);
+    color: var(--t-muted);
     margin: 0;
 }
 .btn-add-user {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: var(--navy);
-    color: var(--gold);
+    background: var(--charcoal);
+    color: var(--orange);
     border: none;
-    border-radius: var(--radius-md);
+    border-radius: var(--r-md);
     padding: 11px 22px;
     font-size: 13.5px;
     font-weight: 800;
     cursor: pointer;
     transition: var(--transition);
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--sh-md);
     white-space: nowrap;
     letter-spacing: .2px;
 }
 .btn-add-user:hover {
-    background: var(--navy-mid);
+    background: var(--charcoal-mid);
     transform: translateY(-2px);
     box-shadow: var(--shadow-lg);
-    color: var(--gold);
+    color: var(--orange);
 }
 .btn-add-user i { font-size: .95rem; }
 
@@ -126,13 +126,13 @@ $activeCount = $totalUsers;
     margin-bottom: 24px;
 }
 .stat-card {
-    background: var(--white);
-    border-radius: var(--radius-lg);
+    background: var(--c-white);
+    border-radius: var(--r-lg);
     padding: 22px 24px;
     display: flex;
     align-items: center;
     gap: 18px;
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--sh-sm);
     border: 1.5px solid transparent;
     transition: var(--transition);
     position: relative;
@@ -143,36 +143,36 @@ $activeCount = $totalUsers;
     position: absolute;
     top: 0; left: 0; right: 0;
     height: 3px;
-    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    border-radius: var(--r-lg) var(--r-lg) 0 0;
 }
-.stat-card.gold::before  { background: var(--gold); }
-.stat-card.navy::before  { background: var(--navy); }
+.stat-card.gold::before  { background: var(--orange); }
+.stat-card.navy::before  { background: var(--charcoal); }
 .stat-card.frost::before { background: var(--frost-mid); }
 .stat-card:hover {
     transform: translateY(-3px);
-    box-shadow: var(--shadow-md);
-    border-color: rgba(38,35,65,.06);
+    box-shadow: var(--sh-md);
+    border-color: rgba(26,26,26,.06);
 }
 .stat-icon {
     width: 54px; height: 54px;
-    border-radius: var(--radius-md);
+    border-radius: var(--r-md);
     display: flex; align-items: center; justify-content: center;
     font-size: 1.4rem;
     flex-shrink: 0;
 }
-.stat-icon.gold  { background: var(--gold-light); color: var(--gold-dark); }
-.stat-icon.navy  { background: rgba(38,35,65,.08); color: var(--navy); }
+.stat-icon.gold  { background: var(--gold-light); color: var(--orange-dark); }
+.stat-icon.navy  { background: rgba(26,26,26,.08); color: var(--charcoal); }
 .stat-icon.frost { background: var(--frost); color: #2D8A8A; }
 .stat-value {
     font-size: 2rem;
     font-weight: 900;
-    color: var(--navy);
+    color: var(--charcoal);
     line-height: 1;
     letter-spacing: -1px;
 }
 .stat-label {
     font-size: 12px;
-    color: var(--text-muted);
+    color: var(--t-muted);
     font-weight: 600;
     margin-top: 4px;
     text-transform: uppercase;
@@ -183,10 +183,10 @@ $activeCount = $totalUsers;
    TABLE CARD
 ══════════════════════════════════ */
 .table-card {
-    background: var(--white);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-sm);
-    border: 1.5px solid rgba(38,35,65,.05);
+    background: var(--c-white);
+    border-radius: var(--r-lg);
+    box-shadow: var(--sh-sm);
+    border: 1.5px solid rgba(26,26,26,.05);
     overflow: hidden;
 }
 .table-card-header {
@@ -197,12 +197,12 @@ $activeCount = $totalUsers;
     flex-wrap: wrap;
     gap: 14px;
     border-bottom: 1.5px solid var(--frost);
-    background: var(--white);
+    background: var(--c-white);
 }
 .table-card-title {
     font-size: 1rem;
     font-weight: 900;
-    color: var(--navy);
+    color: var(--charcoal);
     margin: 0;
     display: flex;
     align-items: center;
@@ -210,7 +210,7 @@ $activeCount = $totalUsers;
 }
 .table-card-title .title-dot {
     width: 10px; height: 10px;
-    background: var(--gold);
+    background: var(--orange);
     border-radius: 50%;
     flex-shrink: 0;
 }
@@ -232,30 +232,30 @@ $activeCount = $totalUsers;
     border-radius: 10px;
     font-size: 13px;
     background: var(--off-white);
-    color: var(--navy);
+    color: var(--charcoal);
     outline: none;
     transition: var(--transition);
 }
 .um-search input:focus {
-    border-color: var(--navy);
-    background: var(--white);
-    box-shadow: 0 0 0 3px rgba(38,35,65,.08);
+    border-color: var(--charcoal);
+    background: var(--c-white);
+    box-shadow: 0 0 0 3px rgba(26,26,26,.08);
 }
 .um-search i {
     position: absolute;
     left: 12px; top: 50%;
     transform: translateY(-50%);
-    color: var(--navy-light);
+    color: var(--charcoal-light);
     font-size: .85rem;
 }
-.um-search input:focus ~ i, .um-search:focus-within i { color: var(--navy); }
+.um-search input:focus ~ i, .um-search:focus-within i { color: var(--charcoal); }
 
 /* ── Table itself ──────────────────────────────────────── */
 #userTable { width: 100%; margin: 0; border-collapse: collapse; }
 
 #userTable thead tr th {
     background: var(--off-white);
-    color: var(--navy-light);
+    color: var(--charcoal-light);
     font-size: 10.5px;
     font-weight: 800;
     text-transform: uppercase;
@@ -293,8 +293,8 @@ $activeCount = $totalUsers;
     flex-shrink: 0;
     letter-spacing: .3px;
 }
-.user-name { font-weight: 700; color: var(--navy); line-height: 1.3; }
-.user-handle { font-size: 11.5px; color: var(--text-muted); }
+.user-name { font-weight: 700; color: var(--charcoal); line-height: 1.3; }
+.user-handle { font-size: 11.5px; color: var(--t-muted); }
 
 /* Role chip */
 .role-chip {
@@ -304,7 +304,7 @@ $activeCount = $totalUsers;
     font-size: 11.5px; font-weight: 800;
     letter-spacing: .2px;
 }
-.role-chip.admin   { background: rgba(38,35,65,.09); color: var(--navy); }
+.role-chip.admin   { background: rgba(26,26,26,.09); color: var(--charcoal); }
 .role-chip.cashier { background: var(--warn-lt); color: var(--warn); }
 .role-chip.other   { background: var(--frost); color: #2D8A8A; }
 
@@ -312,7 +312,7 @@ $activeCount = $totalUsers;
 .userno-badge {
     display: inline-block;
     background: var(--gold-light);
-    color: var(--gold-dark);
+    color: var(--orange-dark);
     font-size: 11.5px; font-weight: 800;
     padding: 3px 10px;
     border-radius: 6px;
@@ -331,18 +331,18 @@ $activeCount = $totalUsers;
     transition: var(--transition);
     flex-shrink: 0;
 }
-.btn-action.edit  { background: rgba(38,35,65,.07); color: var(--navy); }
+.btn-action.edit  { background: rgba(26,26,26,.07); color: var(--charcoal); }
 .btn-action.key   { background: var(--warn-lt); color: var(--warn); }
-.btn-action.del   { background: var(--danger-lt); color: var(--danger); }
-.btn-action.edit:hover  { background: var(--navy); color: var(--gold); transform: scale(1.1); }
+.btn-action.del   { background: var(--danger-lt); color: var(--c-danger); }
+.btn-action.edit:hover  { background: var(--charcoal); color: var(--orange); transform: scale(1.1); }
 .btn-action.key:hover   { background: var(--warn); color: #fff; transform: scale(1.1); }
-.btn-action.del:hover   { background: var(--danger); color: #fff; transform: scale(1.1); }
+.btn-action.del:hover   { background: var(--c-danger); color: #fff; transform: scale(1.1); }
 .btn-action:disabled, .btn-action[disabled] { opacity: .3; cursor: not-allowed; transform: none !important; }
 
 /* Empty state */
 .empty-state {
     text-align: center; padding: 64px 24px;
-    color: var(--navy-light);
+    color: var(--charcoal-light);
 }
 .empty-state i { font-size: 2.8rem; display: block; margin-bottom: 14px; opacity: .35; }
 .empty-state p { font-size: 14px; margin: 0; }
@@ -350,24 +350,24 @@ $activeCount = $totalUsers;
 /* DataTables pagination override */
 .dataTables_wrapper .dataTables_filter,
 .dataTables_wrapper .dataTables_length { display: none; }
-.dataTables_wrapper .dataTables_info { padding: 14px 24px; font-size: 12.5px; color: var(--text-muted); }
+.dataTables_wrapper .dataTables_info { padding: 14px 24px; font-size: 12.5px; color: var(--t-muted); }
 .dataTables_wrapper .dataTables_paginate { padding: 12px 20px; }
 .dataTables_wrapper .paginate_button {
     border-radius: 8px !important;
     font-size: 12.5px !important;
     font-weight: 700 !important;
-    color: var(--navy) !important;
+    color: var(--charcoal) !important;
     border: none !important;
     padding: 5px 10px !important;
 }
 .dataTables_wrapper .paginate_button.current {
-    background: var(--navy) !important;
-    color: var(--gold) !important;
+    background: var(--charcoal) !important;
+    color: var(--orange) !important;
     border: none !important;
 }
 .dataTables_wrapper .paginate_button:hover:not(.current) {
     background: var(--frost) !important;
-    color: var(--navy) !important;
+    color: var(--charcoal) !important;
 }
 .dataTables_wrapper .dataTables_info,
 .dataTables_wrapper .dataTables_paginate {
@@ -384,12 +384,12 @@ $activeCount = $totalUsers;
 ══════════════════════════════════ */
 .modal-content {
     border: none;
-    border-radius: var(--radius-lg);
+    border-radius: var(--r-lg);
     overflow: hidden;
     box-shadow: var(--shadow-lg);
 }
 .um-modal-header {
-    background: var(--navy);
+    background: var(--charcoal);
     padding: 20px 24px;
     display: flex; align-items: center; justify-content: space-between;
 }
@@ -397,15 +397,15 @@ $activeCount = $totalUsers;
     margin: 0;
     font-weight: 800;
     font-size: .95rem;
-    color: var(--white);
+    color: var(--c-white);
     display: flex; align-items: center; gap: 10px;
 }
-.um-modal-header h5 i { color: var(--gold); }
+.um-modal-header h5 i { color: var(--orange); }
 .um-modal-header .btn-close { filter: brightness(0) invert(1); opacity: .7; }
 .um-modal-header .btn-close:hover { opacity: 1; }
 
 .um-modal-danger-header {
-    background: linear-gradient(135deg, #c0392b, var(--danger));
+    background: linear-gradient(135deg, #c0392b, var(--c-danger));
     padding: 20px 24px;
     display: flex; align-items: center; justify-content: space-between;
 }
@@ -440,8 +440,8 @@ $activeCount = $totalUsers;
     font-weight: 900;
     text-transform: uppercase;
     letter-spacing: 1px;
-    color: var(--navy);
-    border-bottom: 2px solid var(--gold);
+    color: var(--charcoal);
+    border-bottom: 2px solid var(--orange);
     padding-bottom: 6px;
     margin: 20px 0 14px;
     display: flex; align-items: center; gap: 8px;
@@ -450,39 +450,39 @@ $activeCount = $totalUsers;
 .um-section-label::before {
     content: '';
     width: 4px; height: 14px;
-    background: var(--gold);
+    background: var(--orange);
     border-radius: 2px;
     flex-shrink: 0;
 }
 .form-label {
     font-size: 12px;
     font-weight: 700;
-    color: var(--navy-light);
+    color: var(--charcoal-light);
     margin-bottom: 5px;
     text-transform: uppercase;
     letter-spacing: .4px;
 }
-.required-star { color: var(--danger); margin-left: 2px; }
+.required-star { color: var(--c-danger); margin-left: 2px; }
 .form-control, .form-select {
     border: 1.5px solid var(--frost-mid);
-    border-radius: var(--radius-sm);
+    border-radius: var(--r-sm);
     padding: 9px 13px;
     font-size: 13.5px;
-    color: var(--navy);
+    color: var(--charcoal);
     background: var(--off-white);
     transition: var(--transition);
 }
 .form-control:focus, .form-select:focus {
-    border-color: var(--navy);
-    background: var(--white);
-    box-shadow: 0 0 0 3px rgba(38,35,65,.09);
+    border-color: var(--charcoal);
+    background: var(--c-white);
+    box-shadow: 0 0 0 3px rgba(26,26,26,.09);
     outline: none;
-    color: var(--navy);
+    color: var(--charcoal);
 }
 .info-note {
     background: var(--frost);
     border-left: 3px solid var(--frost-mid);
-    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    border-radius: 0 var(--r-sm) var(--r-sm) 0;
     padding: 10px 14px;
     font-size: 12.5px;
     color: #2D8A8A;
@@ -491,10 +491,10 @@ $activeCount = $totalUsers;
 
 /* Buttons */
 .btn-ev {
-    background: var(--navy);
-    color: var(--gold);
+    background: var(--charcoal);
+    color: var(--orange);
     border: none;
-    border-radius: var(--radius-sm);
+    border-radius: var(--r-sm);
     padding: 9px 18px;
     font-size: 13px;
     font-weight: 800;
@@ -503,16 +503,16 @@ $activeCount = $totalUsers;
     display: inline-flex; align-items: center; gap: 7px;
 }
 .btn-ev:hover {
-    background: var(--navy-mid);
-    color: var(--gold);
+    background: var(--charcoal-mid);
+    color: var(--orange);
     transform: translateY(-1px);
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--sh-md);
 }
 .btn-warn {
     background: var(--warn);
     color: #fff;
     border: none;
-    border-radius: var(--radius-sm);
+    border-radius: var(--r-sm);
     padding: 9px 18px;
     font-size: 13px;
     font-weight: 800;
@@ -523,9 +523,9 @@ $activeCount = $totalUsers;
 .btn-warn:hover { background: #d4691a; color: #fff; }
 .btn-secondary {
     background: transparent;
-    color: var(--navy-light);
+    color: var(--charcoal-light);
     border: 1.5px solid var(--frost-mid);
-    border-radius: var(--radius-sm);
+    border-radius: var(--r-sm);
     padding: 8px 16px;
     font-size: 13px;
     font-weight: 700;
@@ -534,26 +534,26 @@ $activeCount = $totalUsers;
 }
 .btn-secondary:hover {
     background: var(--frost);
-    color: var(--navy);
+    color: var(--charcoal);
     border-color: var(--frost-mid);
 }
 
 /* ── Toast ──────────────────────────────────────────────── */
 .ev-toast {
     position: fixed; top: 20px; right: 24px; z-index: 9999;
-    background: var(--navy);
-    border-radius: var(--radius-md);
+    background: var(--charcoal);
+    border-radius: var(--r-md);
     box-shadow: var(--shadow-lg);
     padding: 14px 18px;
     display: flex; align-items: center; gap: 12px;
     min-width: 280px; max-width: 360px;
     transform: translateX(120%);
     transition: transform .35s cubic-bezier(.34,1.56,.64,1);
-    border-left: 4px solid var(--gold);
+    border-left: 4px solid var(--orange);
 }
 .ev-toast.show { transform: translateX(0); }
-.ev-toast-icon { font-size: 1.2rem; color: var(--gold); flex-shrink: 0; }
-.ev-toast-msg  { font-size: 13.5px; font-weight: 700; color: var(--white); }
+.ev-toast-icon { font-size: 1.2rem; color: var(--orange); flex-shrink: 0; }
+.ev-toast-msg  { font-size: 13.5px; font-weight: 700; color: var(--c-white); }
 .ev-toast-sub  { font-size: 12px; color: rgba(255,255,255,.55); }
 </style>
 
@@ -674,7 +674,7 @@ foreach ($alerts as $k => [$icon, $title, $text]) {
                         default   => 'other',
                     };
                     $avStyles = [
-                        'Admin'   => 'background:rgba(38,35,65,.1);color:#262341;',
+                        'Admin'   => 'background:rgba(26,26,26,.1);color:#1A1A1A;',
                         'Cashier' => 'background:#FEF0E3;color:#d4691a;',
                     ];
                     $avStyle = $avStyles[$u['roleName']] ?? 'background:#E7F5F5;color:#2D8A8A;';
@@ -691,15 +691,15 @@ foreach ($alerts as $k => [$icon, $title, $text]) {
                             </div>
                         </div>
                     </td>
-                    <td style="color:var(--text-muted);"><?= htmlspecialchars($u['email']) ?></td>
+                    <td style="color:var(--t-muted);"><?= htmlspecialchars($u['email']) ?></td>
                     <td>
                         <span class="role-chip <?= $chipClass ?>">
                             <i class="bi bi-<?= $u['roleName']==='Admin' ? 'shield-check' : 'person' ?>"></i>
                             <?= htmlspecialchars($u['roleName']) ?>
                         </span>
                     </td>
-                    <td style="color:var(--text-muted);"><?= htmlspecialchars($u['gender'] ?? '—') ?></td>
-                    <td style="color:var(--text-muted);"><?= htmlspecialchars($u['contactNo'] ?? '—') ?></td>
+                    <td style="color:var(--t-muted);"><?= htmlspecialchars($u['gender'] ?? '—') ?></td>
+                    <td style="color:var(--t-muted);"><?= htmlspecialchars($u['contactNo'] ?? '—') ?></td>
                     <td>
                         <span class="userno-badge"><?= htmlspecialchars($u['userNo'] ?? '—') ?></span>
                     </td>
@@ -853,10 +853,10 @@ foreach ($alerts as $k => [$icon, $title, $text]) {
                             <div class="user-avatar mx-auto mb-3" style="width:52px;height:52px;border-radius:14px;font-size:1.1rem;<?= $avStyle ?>;display:flex;align-items:center;justify-content:center;">
                                 <?= htmlspecialchars($initials) ?>
                             </div>
-                            <p style="margin:0;font-size:14px;color:var(--text-muted);">
-                                Remove <strong style="color:var(--navy);"><?= htmlspecialchars($fullName) ?></strong> from the system?
+                            <p style="margin:0;font-size:14px;color:var(--t-muted);">
+                                Remove <strong style="color:var(--charcoal);"><?= htmlspecialchars($fullName) ?></strong> from the system?
                             </p>
-                            <p style="font-size:12px;color:var(--danger);margin:8px 0 0;font-weight:600;">This action cannot be undone.</p>
+                            <p style="font-size:12px;color:var(--c-danger);margin:8px 0 0;font-weight:600;">This action cannot be undone.</p>
                         </div>
                         <div class="modal-footer" style="justify-content:center;">
                           <button type="button" class="btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -956,7 +956,7 @@ foreach ($alerts as $k => [$icon, $title, $text]) {
               <label class="form-label">Password<span class="required-star">*</span></label>
               <div style="position:relative;">
                 <input type="password" name="password" id="addPwField" class="form-control" minlength="6" required placeholder="Minimum 6 characters">
-                <button type="button" onclick="toggleAddPw()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--navy-light);cursor:pointer;">
+                <button type="button" onclick="toggleAddPw()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--charcoal-light);cursor:pointer;">
                   <i class="bi bi-eye" id="addPwIcon"></i>
                 </button>
               </div>

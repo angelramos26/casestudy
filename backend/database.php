@@ -1,5 +1,11 @@
 <?php
 
+// Start session first so CSRF tokens are consistent across all pages
+if (session_status() === PHP_SESSION_NONE) {
+    ini_set('session.cookie_samesite', 'Lax');
+    session_start();
+}
+
 // Load .env file
 $env = parse_ini_file(__DIR__ . '/../.env');
 
@@ -15,6 +21,10 @@ if ($conn->connect_error) {
     die("Database Connection Failed: " . $conn->connect_error);
 }
 $conn->set_charset("utf8mb4");
+
+// Set timezone to Asia/Manila so NOW() and date functions match PH time
+date_default_timezone_set('Asia/Manila');
+$conn->query("SET time_zone = '+08:00'");
 
 function sanitize($data) {
     $data = trim($data);

@@ -2,164 +2,164 @@
 require_once '../backend/database.php';
 require_once '../backend/pusher.php';
 
-session_start();
+if (session_status() === PHP_SESSION_NONE) { session_start(); }
 if(!isset($_SESSION['userID'])){ header("Location: ../index.php"); exit(); }
 if(!in_array($_SESSION['roleName'], ['Admin','Owner'])){ header("Location: dashboard.php"); exit(); }
-$pageTitle = "Suppliers – 7Evelyn POS";
+$pageTitle = "Suppliers – Beng's Unli Lugaw";
 ?>
 <?php include 'header.php'; ?>
 <?php include 'nav.php'; ?>
 
 <style>
 /* ── Body ── */
-.sp-body { padding: 24px 28px; background: var(--ice); min-height: calc(100vh - 52px); }
+.sp-body { padding: 24px 28px; background: var(--s-bg); min-height: calc(100vh - 52px); }
 
 /* ── Page header row ── */
 .page-header {
     display: flex; align-items: center; justify-content: space-between;
     margin-bottom: 20px;
 }
-.page-header h5 { margin: 0; font-size: 1.1rem; font-weight: 900; color: var(--text-dark); display: flex; align-items: center; gap: 8px; }
-.page-header h5 i { color: var(--navy-light); }
+.page-header h5 { margin: 0; font-size: 1.1rem; font-weight: 900; color: var(--t-main); display: flex; align-items: center; gap: 8px; }
+.page-header h5 i { color: var(--charcoal-light); }
 
 .btn-add {
-    background: var(--navy); color: var(--gold);
-    border: none; border-radius: var(--radius-sm);
+    background: var(--charcoal); color: var(--orange);
+    border: none; border-radius: var(--r-sm);
     padding: 9px 20px; font-size: 13px; font-weight: 800;
     cursor: pointer; transition: all .2s;
     display: inline-flex; align-items: center; gap: 7px;
-    box-shadow: 0 3px 12px rgba(38,35,65,.18);
+    box-shadow: 0 3px 12px rgba(26,26,26,.18);
 }
-.btn-add:hover { background: var(--navy-mid); box-shadow: var(--shadow-md); }
+.btn-add:hover { background: var(--charcoal-mid); box-shadow: var(--sh-md); }
 
 /* ── Table card ── */
 .table-card {
-    background: var(--white);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-sm);
-    border: 1px solid var(--ice-dark);
+    background: var(--c-white);
+    border-radius: var(--r-md);
+    box-shadow: var(--sh-sm);
+    border: 1px solid var(--s-border);
     overflow: hidden;
 }
 .table-card-head {
     padding: 14px 20px;
-    border-bottom: 1px solid var(--ice-dark);
+    border-bottom: 1px solid var(--s-border);
     display: flex; align-items: center; justify-content: space-between;
-    background: #fafbff;
+    background: #FFF8F0;
 }
-.table-card-head .tc-title { font-size: 13px; font-weight: 800; color: var(--text-dark); display: flex; align-items: center; gap: 7px; }
-.table-card-head .tc-title i { color: var(--navy-light); }
-.table-card-head .tc-count { background: var(--navy); color: var(--gold); border-radius: 20px; font-size: 11px; font-weight: 800; padding: 2px 10px; }
+.table-card-head .tc-title { font-size: 13px; font-weight: 800; color: var(--t-main); display: flex; align-items: center; gap: 7px; }
+.table-card-head .tc-title i { color: var(--charcoal-light); }
+.table-card-head .tc-count { background: var(--charcoal); color: var(--orange); border-radius: 20px; font-size: 11px; font-weight: 800; padding: 2px 10px; }
 
 .table-wrap { padding: 16px 20px; overflow-x: auto; }
 
 table#supplierTable { width: 100%; border-collapse: collapse; }
 table#supplierTable thead tr th {
-    background: var(--navy); color: var(--gold);
+    background: var(--charcoal); color: var(--orange);
     font-size: 11px; font-weight: 800; letter-spacing: .6px;
     text-transform: uppercase; padding: 11px 14px;
     white-space: nowrap; border: none;
 }
 table#supplierTable tbody tr { transition: background .12s; }
 table#supplierTable tbody tr:hover { background: #f5f8ff; }
-table#supplierTable tbody tr:nth-child(even) { background: #fafbff; }
+table#supplierTable tbody tr:nth-child(even) { background: #FFF8F0; }
 table#supplierTable tbody tr:nth-child(even):hover { background: #f0f4ff; }
 table#supplierTable tbody td {
-    padding: 11px 14px; font-size: 12.5px; color: var(--text-dark);
-    border-bottom: 1px solid var(--ice); vertical-align: middle;
+    padding: 11px 14px; font-size: 12.5px; color: var(--t-main);
+    border-bottom: 1px solid var(--s-bg); vertical-align: middle;
 }
 
-.company-name { font-weight: 800; color: var(--text-dark); }
+.company-name { font-weight: 800; color: var(--t-main); }
 .company-initial {
     width: 34px; height: 34px; border-radius: 10px;
-    background: var(--navy); color: var(--gold);
+    background: var(--charcoal); color: var(--orange);
     display: inline-flex; align-items: center; justify-content: center;
     font-size: 14px; font-weight: 900; flex-shrink: 0;
     margin-right: 10px;
 }
-.contact-person { font-weight: 600; color: var(--text-dark); }
-.email-cell { color: var(--navy-light); font-size: 12px; }
+.contact-person { font-weight: 600; color: var(--t-main); }
+.email-cell { color: var(--charcoal-light); font-size: 12px; }
 .contact-no { font-family: monospace; font-size: 12.5px; }
-.address-cell { color: var(--text-muted); font-size: 12px; max-width: 180px; }
+.address-cell { color: var(--t-muted); font-size: 12px; max-width: 180px; }
 
 .btn-edit {
-    background: var(--ice); color: var(--navy);
-    border: 1.5px solid var(--ice-dark);
-    border-radius: var(--radius-sm);
+    background: var(--s-bg); color: var(--charcoal);
+    border: 1.5px solid var(--s-border);
+    border-radius: var(--r-sm);
     width: 30px; height: 30px;
     display: inline-flex; align-items: center; justify-content: center;
     font-size: 13px; cursor: pointer; transition: all .15s;
     margin-right: 4px;
 }
-.btn-edit:hover { background: var(--navy); color: var(--gold); border-color: var(--navy); }
+.btn-edit:hover { background: var(--charcoal); color: var(--orange); border-color: var(--charcoal); }
 
 .btn-del {
-    background: #fde8ea; color: var(--danger);
+    background: #fde8ea; color: var(--c-danger);
     border: 1.5px solid #f7c0c6;
-    border-radius: var(--radius-sm);
+    border-radius: var(--r-sm);
     width: 30px; height: 30px;
     display: inline-flex; align-items: center; justify-content: center;
     font-size: 13px; cursor: pointer; transition: all .15s;
 }
-.btn-del:hover { background: var(--danger); color: #fff; border-color: var(--danger); }
+.btn-del:hover { background: var(--c-danger); color: #fff; border-color: var(--c-danger); }
 
-.view-only-badge { font-size: 11px; color: var(--text-muted); font-weight: 600; }
+.view-only-badge { font-size: 11px; color: var(--t-muted); font-weight: 600; }
 
 /* DataTables overrides */
 .dataTables_wrapper .dataTables_filter input,
 .dataTables_wrapper .dataTables_length select {
-    border: 1.5px solid var(--ice-dark) !important; border-radius: var(--radius-sm) !important;
+    border: 1.5px solid var(--s-border) !important; border-radius: var(--r-sm) !important;
     padding: 5px 10px !important; font-size: 12.5px !important; outline: none !important;
-    background: var(--ice) !important; color: var(--text-dark) !important;
+    background: var(--s-bg) !important; color: var(--t-main) !important;
 }
 .dataTables_wrapper .dataTables_filter input:focus,
-.dataTables_wrapper .dataTables_length select:focus { border-color: var(--navy) !important; background: var(--white) !important; box-shadow: none !important; }
+.dataTables_wrapper .dataTables_length select:focus { border-color: var(--charcoal) !important; background: var(--c-white) !important; box-shadow: none !important; }
 .dataTables_wrapper .dataTables_filter label,
 .dataTables_wrapper .dataTables_length label,
-.dataTables_wrapper .dataTables_info { font-size: 12px; color: var(--text-muted); }
-.dataTables_wrapper .dataTables_paginate .paginate_button { border-radius: var(--radius-sm) !important; font-size: 12px !important; color: var(--text-mid) !important; }
+.dataTables_wrapper .dataTables_info { font-size: 12px; color: var(--t-muted); }
+.dataTables_wrapper .dataTables_paginate .paginate_button { border-radius: var(--r-sm) !important; font-size: 12px !important; color: var(--t-mid) !important; }
 .dataTables_wrapper .dataTables_paginate .paginate_button.current,
-.dataTables_wrapper .dataTables_paginate .paginate_button.current:hover { background: var(--navy) !important; color: var(--gold) !important; border-color: var(--navy) !important; }
-.dataTables_wrapper .dataTables_paginate .paginate_button:hover { background: var(--ice) !important; color: var(--navy) !important; border-color: var(--ice-dark) !important; }
+.dataTables_wrapper .dataTables_paginate .paginate_button.current:hover { background: var(--charcoal) !important; color: var(--orange) !important; border-color: var(--charcoal) !important; }
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover { background: var(--s-bg) !important; color: var(--charcoal) !important; border-color: var(--s-border) !important; }
 
 /* ── Modals ── */
-.modal-navy .modal-header { background: var(--navy); color: var(--white); border: none; }
+.modal-navy .modal-header { background: var(--charcoal); color: var(--c-white); border: none; }
 .modal-navy .modal-title  { font-weight: 800; }
-.modal-navy .modal-title i { color: var(--gold); }
+.modal-navy .modal-title i { color: var(--orange); }
 .modal-navy .btn-close-white { filter: brightness(0) invert(1); opacity: .7; }
 .modal-navy .modal-content { border: none; border-radius: 16px; overflow: hidden; }
 
-.modal-danger .modal-header { background: var(--danger); color: var(--white); border: none; }
+.modal-danger .modal-header { background: var(--c-danger); color: var(--c-white); border: none; }
 .modal-danger .modal-content { border: none; border-radius: 16px; overflow: hidden; }
 .modal-danger .btn-close-white { filter: brightness(0) invert(1); opacity: .7; }
 
-.form-label-sm { font-size: 12px; font-weight: 700; color: var(--text-mid); margin-bottom: 4px; }
+.form-label-sm { font-size: 12px; font-weight: 700; color: var(--t-mid); margin-bottom: 4px; }
 .form-field {
     width: 100%; padding: 8px 12px;
-    border: 1.5px solid var(--ice-dark); border-radius: var(--radius-sm);
-    font-size: 13px; color: var(--text-dark); background: var(--ice);
+    border: 1.5px solid var(--s-border); border-radius: var(--r-sm);
+    font-size: 13px; color: var(--t-main); background: var(--s-bg);
     outline: none; transition: border-color .2s;
 }
-.form-field:focus { border-color: var(--navy); background: var(--white); box-shadow: none; }
+.form-field:focus { border-color: var(--charcoal); background: var(--c-white); box-shadow: none; }
 
 .btn-save {
-    background: var(--navy); color: var(--gold);
-    border: none; border-radius: var(--radius-sm);
+    background: var(--charcoal); color: var(--orange);
+    border: none; border-radius: var(--r-sm);
     padding: 9px 22px; font-size: 13px; font-weight: 800;
     cursor: pointer; transition: all .2s;
 }
-.btn-save:hover { background: var(--navy-mid); }
+.btn-save:hover { background: var(--charcoal-mid); }
 
 .btn-cancel {
-    background: var(--ice); color: var(--text-mid);
-    border: 1.5px solid var(--ice-dark); border-radius: var(--radius-sm);
+    background: var(--s-bg); color: var(--t-mid);
+    border: 1.5px solid var(--s-border); border-radius: var(--r-sm);
     padding: 8px 18px; font-size: 13px; font-weight: 700;
     cursor: pointer; transition: all .2s;
 }
-.btn-cancel:hover { background: var(--ice-dark); }
+.btn-cancel:hover { background: var(--s-border); }
 
 .btn-delete-confirm {
-    background: var(--danger); color: #fff;
-    border: none; border-radius: var(--radius-sm);
+    background: var(--c-danger); color: #fff;
+    border: none; border-radius: var(--r-sm);
     padding: 8px 18px; font-size: 13px; font-weight: 800;
     cursor: pointer; transition: all .2s;
 }
@@ -268,11 +268,11 @@ include 'topbar.php';
                                 <div class="modal-body" style="padding:20px 24px;">
                                     <input type="hidden" name="supplierID" value="<?php echo $row['supplierID']; ?>">
                                     <div class="mb-3">
-                                        <div class="form-label-sm">Company Name <span style="color:var(--danger);">*</span></div>
+                                        <div class="form-label-sm">Company Name <span style="color:var(--c-danger);">*</span></div>
                                         <input type="text" name="companyName" value="<?php echo htmlspecialchars($row['companyName']); ?>" class="form-field" required>
                                     </div>
                                     <div class="mb-3">
-                                        <div class="form-label-sm">Contact Person <span style="color:var(--danger);">*</span></div>
+                                        <div class="form-label-sm">Contact Person <span style="color:var(--c-danger);">*</span></div>
                                         <input type="text" name="supplierName" value="<?php echo htmlspecialchars($row['supplierName']); ?>" class="form-field" required>
                                     </div>
                                     <div class="mb-3">
@@ -288,7 +288,7 @@ include 'topbar.php';
                                         <textarea name="address" class="form-field" rows="2"><?php echo htmlspecialchars($row['address'] ?? ''); ?></textarea>
                                     </div>
                                 </div>
-                                <div class="modal-footer" style="border-top:1px solid var(--ice-dark);padding:12px 24px;gap:8px;">
+                                <div class="modal-footer" style="border-top:1px solid var(--s-border);padding:12px 24px;gap:8px;">
                                     <button type="button" class="btn-cancel" data-bs-dismiss="modal">Cancel</button>
                                     <button type="submit" name="supplierUpdate" class="btn-save">Update Supplier</button>
                                 </div>
@@ -309,7 +309,7 @@ include 'topbar.php';
                                 </div>
                                 <div class="modal-body" style="padding:20px 24px;">
                                     <input type="hidden" name="supplierID" value="<?php echo $row['supplierID']; ?>">
-                                    <p style="font-size:13.5px;color:var(--text-dark);margin:0;">
+                                    <p style="font-size:13.5px;color:var(--t-main);margin:0;">
                                         Remove <strong><?php echo htmlspecialchars($row['companyName']); ?></strong> from your supplier list? This action cannot be undone.
                                     </p>
                                 </div>
@@ -344,11 +344,11 @@ include 'topbar.php';
                 </div>
                 <div class="modal-body" style="padding:20px 24px;">
                     <div class="mb-3">
-                        <div class="form-label-sm">Company Name <span style="color:var(--danger);">*</span></div>
+                        <div class="form-label-sm">Company Name <span style="color:var(--c-danger);">*</span></div>
                         <input type="text" name="companyName" class="form-field" required placeholder="e.g. ABC Trading Co.">
                     </div>
                     <div class="mb-3">
-                        <div class="form-label-sm">Contact Person <span style="color:var(--danger);">*</span></div>
+                        <div class="form-label-sm">Contact Person <span style="color:var(--c-danger);">*</span></div>
                         <input type="text" name="supplierName" class="form-field" required placeholder="Full name">
                     </div>
                     <div class="mb-3">
@@ -364,7 +364,7 @@ include 'topbar.php';
                         <textarea name="address" class="form-field" rows="2" placeholder="Street, City, Province"></textarea>
                     </div>
                 </div>
-                <div class="modal-footer" style="border-top:1px solid var(--ice-dark);padding:12px 24px;gap:8px;">
+                <div class="modal-footer" style="border-top:1px solid var(--s-border);padding:12px 24px;gap:8px;">
                     <button type="button" class="btn-cancel" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" name="supplierSave" class="btn-save">
                         <i class="bi bi-plus-circle me-1"></i>Save Supplier
@@ -399,4 +399,5 @@ $(document).ready(function(){
     const PUSHER_CLUSTER = '<?php echo defined("PUSHER_APP_CLUSTER") ? PUSHER_APP_CLUSTER : ""; ?>';
 </script>
 <script src="pusher-content/realtime.js"></script>
+<?php include 'footer.php'; ?>
 </body></html>

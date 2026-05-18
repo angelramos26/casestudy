@@ -2,15 +2,27 @@
 require_once '../backend/database.php';
 require_once '../backend/pusher.php';
 
-session_start();
 if(!isset($_SESSION['userID'])){ header("Location: ../index.php"); exit(); }
 if($_SESSION['roleName'] !== 'Admin'){ header("Location: dashboard.php"); exit(); }
-$pageTitle = "Role Management – 7Evelyn POS";
+$pageTitle = "Role Management – Restaurant POS";
 ?>
 <?php include 'header.php'; ?>
 <?php include 'nav.php'; ?>
 
 <style>
+
+/* ── CSS bridge for legacy brand-* variables ── */
+:root {
+    --brand-navy:     var(--charcoal);
+    --brand-yellow:   var(--orange);
+    --brand-yellow-d: var(--orange-dark);
+    --brand-mint:     var(--s-bg);
+    --card-bg:        var(--c-white);
+    --text-main:      var(--t-main);
+    --border:         var(--s-border);
+    --shadow-card:    var(--sh-sm);
+    --shadow-btn:     0 2px 6px rgba(26,26,26,0.15);
+}
 
 /* ── Page ─────────────────────────────────── */
 .rm-page { padding: 28px 32px; background: var(--brand-mint); min-height: 100vh; }
@@ -33,7 +45,7 @@ $pageTitle = "Role Management – 7Evelyn POS";
 
 /* ── Shared card ──────────────────────────── */
 .rm-card {
-  background: var(--card-bg); border-radius: var(--radius-lg);
+  background: var(--card-bg); border-radius: var(--r-lg);
   box-shadow: var(--shadow-card); border: 1.5px solid var(--border);
   overflow: hidden;
 }
@@ -51,12 +63,12 @@ $pageTitle = "Role Management – 7Evelyn POS";
 /* ── Add Role button ──────────────────────── */
 .btn-add {
   display: inline-flex; align-items: center; gap: 7px;
-  background: var(--brand-yellow); color: var(--brand-navy);
+  background: var(--charcoal); color: var(--orange);
   font-weight: 700; font-size: .84rem; border: none;
-  border-radius: var(--radius-sm); padding: 9px 18px; cursor: pointer;
+  border-radius: var(--r-sm); padding: 9px 18px; cursor: pointer;
   box-shadow: var(--shadow-btn); transition: background .15s, transform .1s;
 }
-.btn-add:hover { background: var(--brand-yellow-d); transform: translateY(-1px); }
+.btn-add:hover { background: var(--charcoal-mid); color: var(--orange); transform: translateY(-1px); }
 
 /* ── Roles table ──────────────────────────── */
 #roleTable { width: 100%; border-collapse: collapse; margin: 0; }
@@ -77,7 +89,7 @@ $pageTitle = "Role Management – 7Evelyn POS";
 .role-dot {
   width: 9px; height: 9px; border-radius: 50%;
   background: var(--brand-yellow); flex-shrink: 0;
-  box-shadow: 0 0 0 2px rgba(249,217,74,.3);
+  box-shadow: 0 0 0 2px rgba(239,130,13,.3);
 }
 .role-name-text { font-weight: 700; color: var(--brand-navy); }
 
@@ -92,31 +104,46 @@ $pageTitle = "Role Management – 7Evelyn POS";
 /* ── Action buttons ───────────────────────── */
 .action-group { display: flex; gap: 6px; justify-content: center; }
 .btn-action {
-  width: 32px; height: 32px; border-radius: var(--radius-sm);
+  width: 32px; height: 32px; border-radius: var(--r-sm);
   border: none; cursor: pointer;
   display: inline-flex; align-items: center; justify-content: center;
   font-size: .88rem; transition: opacity .15s, transform .1s;
 }
 .btn-action:hover { opacity: .82; transform: scale(1.08); }
 .btn-edit { background: #ebf4ff; color: var(--info); }
-.btn-del  { background: #fff5f5; color: var(--danger); }
+.btn-del  { background: #fff5f5; color: var(--c-danger); }
 
 /* ── DataTable overrides ──────────────────── */
 div.dataTables_wrapper div.dataTables_filter label,
-div.dataTables_wrapper div.dataTables_length label { color: var(--text-muted); font-size: .83rem; }
+div.dataTables_wrapper div.dataTables_length label { color: var(--t-muted); font-size: .83rem; }
 div.dataTables_wrapper div.dataTables_filter input,
 div.dataTables_wrapper div.dataTables_length select {
-  border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border); border-radius: var(--r-sm);
   padding: 5px 10px; font-size: .83rem; color: var(--text-main);
   background: var(--card-bg); outline: none;
 }
-div.dataTables_wrapper div.dataTables_filter input:focus { border-color: var(--brand-yellow); }
-div.dataTables_wrapper div.dataTables_paginate .paginate_button { border-radius: var(--radius-sm) !important; font-size: .8rem; }
+div.dataTables_wrapper div.dataTables_filter input:focus { border-color: var(--orange); }
+div.dataTables_wrapper div.dataTables_paginate .paginate_button {
+  border-radius: var(--r-sm) !important; font-size: .8rem !important;
+  border: 1.5px solid var(--border) !important;
+  background: var(--card-bg) !important; color: var(--t-mid) !important;
+  margin: 0 2px !important;
+}
 div.dataTables_wrapper div.dataTables_paginate .paginate_button.current,
 div.dataTables_wrapper div.dataTables_paginate .paginate_button.current:hover {
-  background: var(--brand-navy) !important; color: #fff !important; border-color: var(--brand-navy) !important;
+  background: var(--charcoal) !important; color: var(--orange) !important;
+  border-color: var(--charcoal) !important; font-weight: 700 !important;
 }
-div.dataTables_wrapper .dataTables_info { color: var(--text-muted); font-size: .8rem; }
+div.dataTables_wrapper div.dataTables_paginate .paginate_button:hover:not(.current):not(.disabled) {
+  background: var(--orange-soft) !important; color: var(--orange-dark) !important;
+  border-color: var(--orange) !important;
+}
+div.dataTables_wrapper div.dataTables_paginate .paginate_button.disabled,
+div.dataTables_wrapper div.dataTables_paginate .paginate_button.disabled:hover {
+  background: transparent !important; color: var(--t-muted) !important;
+  border-color: var(--border) !important; opacity: .4 !important;
+}
+div.dataTables_wrapper .dataTables_info { color: var(--t-muted); font-size: .8rem; }
 .dt-controls { padding: 14px 22px 8px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
 
 /* ── Access Matrix (right panel) ─────────── */
@@ -131,9 +158,9 @@ div.dataTables_wrapper .dataTables_info { color: var(--text-muted); font-size: .
 .matrix-checks { display: flex; gap: 18px; align-items: center; }
 .matrix-role-label {
   font-size: .65rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: .06em; color: var(--text-muted); text-align: center; min-width: 42px;
+  letter-spacing: .06em; color: var(--t-muted); text-align: center; min-width: 42px;
 }
-.check-yes { color: var(--success); font-size: 1rem; }
+.check-yes { color: var(--c-success); font-size: 1rem; }
 .check-no  { color: #d0cfe0; font-size: 1rem; }
 
 .matrix-legend {
@@ -141,7 +168,7 @@ div.dataTables_wrapper .dataTables_info { color: var(--text-muted); font-size: .
   gap: 12px; padding: 10px 20px 14px;
   border-top: 1.5px solid var(--border); background: #fafafa;
 }
-.legend-item { display: flex; align-items: center; gap: 5px; font-size: .72rem; color: var(--text-muted); font-weight: 500; }
+.legend-item { display: flex; align-items: center; gap: 5px; font-size: .72rem; color: var(--t-muted); font-weight: 500; }
 
 /* ── Matrix column headers ────────────────── */
 .matrix-col-headers {
@@ -149,41 +176,41 @@ div.dataTables_wrapper .dataTables_info { color: var(--text-muted); font-size: .
   padding: 10px 20px 8px; border-bottom: 1.5px solid var(--border);
   background: #f8f8fc;
 }
-.matrix-col-headers .module-name { font-size: .7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; }
+.matrix-col-headers .module-name { font-size: .7rem; font-weight: 700; color: var(--t-muted); text-transform: uppercase; letter-spacing: .05em; }
 
 /* ── Modal ────────────────────────────────── */
-.modal-content { border-radius: var(--radius-lg); border: none; box-shadow: 0 8px 40px rgba(38,35,65,.18); overflow: hidden; }
+.modal-content { border-radius: var(--r-lg); border: none; box-shadow: 0 8px 40px rgba(26,26,26,.18); overflow: hidden; }
 .modal-header-brand { background: var(--brand-navy); color: #fff; padding: 18px 24px; display: flex; align-items: center; justify-content: space-between; }
 .modal-header-brand .modal-title { font-size: 1rem; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 8px; }
 .modal-header-brand .btn-close { filter: brightness(0) invert(1); opacity: .7; }
-.modal-header-danger { background: var(--danger); color: #fff; padding: 18px 24px; display: flex; align-items: center; justify-content: space-between; }
+.modal-header-danger { background: var(--c-danger); color: #fff; padding: 18px 24px; display: flex; align-items: center; justify-content: space-between; }
 .modal-header-danger .modal-title { font-size: 1rem; font-weight: 700; margin: 0; }
 .modal-header-danger .btn-close { filter: brightness(0) invert(1); opacity: .7; }
 .modal-body  { padding: 22px 24px; }
 .modal-footer{ padding: 14px 24px; border-top: 1.5px solid var(--border); background: #fafafa; }
-.form-label-styled { font-size: .75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 5px; display: block; }
+.form-label-styled { font-size: .75rem; font-weight: 600; color: var(--t-muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 5px; display: block; }
 .form-control-styled {
-  border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border); border-radius: var(--r-sm);
   padding: 9px 13px; font-size: .88rem; color: var(--text-main);
   transition: border-color .15s, box-shadow .15s; width: 100%;
 }
-.form-control-styled:focus { outline: none; border-color: var(--brand-yellow); box-shadow: 0 0 0 3px rgba(249,217,74,.2); }
+.form-control-styled:focus { outline: none; border-color: var(--brand-yellow); box-shadow: 0 0 0 3px rgba(239,130,13,.2); }
 .btn-submit {
-  background: var(--brand-yellow); color: var(--brand-navy);
-  font-weight: 700; border: none; border-radius: var(--radius-sm);
+  background: var(--charcoal); color: var(--orange);
+  font-weight: 700; border: none; border-radius: var(--r-sm);
   padding: 9px 22px; font-size: .88rem; cursor: pointer; transition: background .15s;
 }
-.btn-submit:hover { background: var(--brand-yellow-d); }
+.btn-submit:hover { background: var(--charcoal-mid); color: var(--orange); }
 .btn-cancel-m {
-  background: transparent; color: var(--text-muted);
+  background: transparent; color: var(--t-muted);
   font-weight: 600; border: 1.5px solid var(--border);
-  border-radius: var(--radius-sm); padding: 9px 18px; font-size: .88rem; cursor: pointer;
+  border-radius: var(--r-sm); padding: 9px 18px; font-size: .88rem; cursor: pointer;
   transition: border-color .15s;
 }
 .btn-cancel-m:hover { border-color: #aaa; color: var(--text-main); }
 .btn-danger-solid {
-  background: var(--danger); color: #fff; font-weight: 700;
-  border: none; border-radius: var(--radius-sm);
+  background: var(--c-danger); color: #fff; font-weight: 700;
+  border: none; border-radius: var(--r-sm);
   padding: 9px 20px; font-size: .88rem; cursor: pointer; transition: opacity .15s;
 }
 .btn-danger-solid:hover { opacity: .88; }
@@ -196,21 +223,22 @@ div.dataTables_wrapper .dataTables_info { color: var(--text-muted); font-size: .
 $alerts=['savedData'=>['success','Saved!','Role created.'],'updatedRole'=>['success','Updated!','Role updated.'],'roleDeleted'=>['success','Deleted!','Role removed.'],'nameDuplicate'=>['error','Duplicate Name','This role name already exists.'],'emptyFields'=>['warning','Required Fields','Fill in role name.']];
 foreach($alerts as $k=>[$i,$t,$tx]) if(isset($_GET[$k])) echo "<script>Swal.fire({icon:'$i',title:'$t',text:'$tx',timer:2000}).then(()=>window.history.replaceState({},document.title,window.location.pathname));</script>";
 
+// Columns: Admin | Owner | Cashier | Kitchen Staff
 $access = [
-  'Dashboard'        => [true, true, true],
-  'Point of Sale'    => [true, false, true],
-  'Sales Records'    => [true, true, true],
-  'Products'         => [true, true, false],
-  'Categories'       => [true, true, false],
-  'Inventory/Stocks' => [true, true, false],
-  'Customers'        => [true, true, false],
-  'Suppliers'        => [true, true, false],
-  'Purchase Orders'  => [true, true, false],
-  'Expenses'         => [true, true, false],
-  'Reports'          => [true, true, false],
-  'User Management'  => [true, false, false],
-  'Role Management'  => [true, false, false],
-  'System Settings'  => [true, false, false],
+  'Dashboard'        => [true,  true,  true,  true ],
+  'POS / Take Order' => [true,  false, true,  false],
+  'Table Map'        => [true,  false, true,  false],
+  'Kitchen Display'  => [true,  false, true,  true ],
+  'Menu Items'       => [true,  false, false, false],
+  'Categories'       => [true,  false, false, false],
+  'Order History'    => [true,  false, true,  false],
+  'Sales Records'    => [true,  true,  false, false],
+  'Expenses'         => [true,  true,  false, false],
+  'Reports'          => [true,  true,  false, false],
+  'User Management'  => [true,  false, false, false],
+  'Role Management'  => [true,  false, false, false],
+  'System Settings'  => [true,  false, false, false],
+  'My Profile'       => [true,  true,  true,  true ],
 ];
 
 $roles = $conn->query("SELECT r.*, COUNT(u.userID) AS userCount FROM role r LEFT JOIN users u ON r.roleID=u.roleID AND u.dateDeleted IS NULL WHERE r.dateDeleted IS NULL GROUP BY r.roleID ORDER BY r.roleName");
@@ -261,7 +289,7 @@ while($r=$roles->fetch_assoc()) $roleRows[] = $r;
                 <span class="role-name-text"><?php echo htmlspecialchars($r['roleName']); ?></span>
               </div>
             </td>
-            <td style="font-size:.83rem; color:var(--text-muted);"><?php echo htmlspecialchars($r['roleDesc'] ?? '—'); ?></td>
+            <td style="font-size:.83rem; color:var(--t-muted);"><?php echo htmlspecialchars($r['roleDesc'] ?? '—'); ?></td>
             <td style="text-align:center;">
               <span class="user-count-badge">
                 <i class="bi bi-people-fill" style="font-size:.72rem;"></i>
@@ -312,6 +340,7 @@ while($r=$roles->fetch_assoc()) $roleRows[] = $r;
           <span class="matrix-role-label">Admin</span>
           <span class="matrix-role-label">Owner</span>
           <span class="matrix-role-label">Cashier</span>
+          <span class="matrix-role-label">Kitchen</span>
         </div>
       </div>
 
@@ -335,7 +364,7 @@ while($r=$roles->fetch_assoc()) $roleRows[] = $r;
 
       <!-- Legend -->
       <div class="matrix-legend">
-        <div class="legend-item"><i class="bi bi-check-circle-fill" style="color:var(--success);"></i> Has Access</div>
+        <div class="legend-item"><i class="bi bi-check-circle-fill" style="color:var(--c-success);"></i> Has Access</div>
         <div class="legend-item"><i class="bi bi-dash-circle" style="color:#d0cfe0;"></i> No Access</div>
       </div>
     </div><!-- /right -->
@@ -359,7 +388,7 @@ while($r=$roles->fetch_assoc()) $roleRows[] = $r;
         </div>
         <div class="modal-body">
           <div class="mb-3">
-            <label class="form-label-styled">Role Name <span style="color:var(--danger);">*</span></label>
+            <label class="form-label-styled">Role Name <span style="color:var(--c-danger);">*</span></label>
             <input type="text" name="roleName" class="form-control-styled" required placeholder="e.g. Supervisor">
           </div>
           <div class="mb-0">
@@ -392,7 +421,7 @@ while($r=$roles->fetch_assoc()) $roleRows[] = $r;
         <div class="modal-body">
           <input type="hidden" name="roleID" value="<?php echo $r['roleID']; ?>">
           <div class="mb-3">
-            <label class="form-label-styled">Role Name <span style="color:var(--danger);">*</span></label>
+            <label class="form-label-styled">Role Name <span style="color:var(--c-danger);">*</span></label>
             <input type="text" name="roleName" value="<?php echo htmlspecialchars($r['roleName']); ?>" class="form-control-styled" required>
           </div>
           <div class="mb-0">
@@ -422,11 +451,11 @@ while($r=$roles->fetch_assoc()) $roleRows[] = $r;
         </div>
         <div class="modal-body" style="text-align:center; padding:28px 24px;">
           <input type="hidden" name="roleID" value="<?php echo $r['roleID']; ?>">
-          <div style="width:52px;height:52px;border-radius:50%;background:#fff5f5;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:1.5rem;color:var(--danger);">
+          <div style="width:52px;height:52px;border-radius:50%;background:#fff5f5;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:1.5rem;color:var(--c-danger);">
             <i class="bi bi-shield-x"></i>
           </div>
           <p style="font-weight:700;color:var(--text-main);margin-bottom:6px;">Delete <strong><?php echo htmlspecialchars($r['roleName']); ?></strong>?</p>
-          <p style="font-size:.82rem;color:var(--text-muted);margin:0;">This action cannot be undone.</p>
+          <p style="font-size:.82rem;color:var(--t-muted);margin:0;">This action cannot be undone.</p>
         </div>
         <div class="modal-footer" style="justify-content:center; gap:10px;">
           <button type="button" class="btn-cancel-m" data-bs-dismiss="modal">Cancel</button>
@@ -466,4 +495,5 @@ $(document).ready(function(){
   const PUSHER_CLUSTER = '<?php echo defined("PUSHER_APP_CLUSTER") ? PUSHER_APP_CLUSTER : ""; ?>';
 </script>
 <script src="pusher-content/realtime.js"></script>
+<?php include 'footer.php'; ?>
 </body></html>

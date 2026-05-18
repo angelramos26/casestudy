@@ -191,6 +191,73 @@
         toast(msgs[d.action] || 'Role updated', d.action === 'deleted' ? 'warning' : 'info');
     });
 
+    // ══════════════════════════════════════════════════════════════════════════
+    // order-opened  (new dine-in or takeout order)
+    // ══════════════════════════════════════════════════════════════════════════
+    channel.bind('order-opened', function (d) {
+        var label = d.orderType === 'Dine-in' ? '🍽️ Dine-in' : '🥡 Takeout';
+        toast(label + ' order #' + d.orderID + ' opened' + (d.tableID ? ' (Table ' + d.tableID + ')' : '') + ' by ' + (d.by || ''), 'info');
+    });
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // order-updated  (item added / item voided)
+    // ══════════════════════════════════════════════════════════════════════════
+    channel.bind('order-updated', function (d) {
+        var msgs = {
+            'item-added': '➕ Item added to Order #' + d.orderID + ' (x' + (d.qty || 1) + ') by ' + (d.by || ''),
+            'item-voided': '❌ Item voided from Order #' + (d.orderItemID || '') + (d.reason ? ' — ' + d.reason : '') + ' (by ' + (d.by || '') + ')',
+        };
+        toast(msgs[d.action] || 'Order #' + d.orderID + ' updated by ' + (d.by || ''), 'info');
+    });
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // order-paid  (bill settled)
+    // ══════════════════════════════════════════════════════════════════════════
+    channel.bind('order-paid', function (d) {
+        toast('💳 Order #' + d.orderID + ' paid — ' + peso(d.total) + ' via ' + (d.paymentMethod || '') + ' by ' + (d.cashier || ''), 'success');
+    });
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // order-cancelled
+    // ══════════════════════════════════════════════════════════════════════════
+    channel.bind('order-cancelled', function (d) {
+        toast('🚫 Order #' + d.orderID + ' cancelled' + (d.reason ? ' — ' + d.reason : '') + ' (by ' + (d.by || '') + ')', 'warning');
+    });
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // kitchen-order  (waiter/cashier sent order to kitchen)
+    // ══════════════════════════════════════════════════════════════════════════
+    channel.bind('kitchen-order', function (d) {
+        toast('🔔 Kitchen: New order #' + d.orderID + ' — ' + (d.tableNo || d.orderType || '') + ' (' + (d.items ? d.items.length : 0) + ' items) by ' + (d.by || ''), 'info');
+    });
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // kitchen-update  (item ready / item served)
+    // ══════════════════════════════════════════════════════════════════════════
+    channel.bind('kitchen-update', function (d) {
+        var msgs = {
+            ready:  '✅ Kitchen: Item #' + d.orderItemID + ' ready (by ' + (d.by || '') + ')',
+            served: '🍽️ Item #' + d.orderItemID + ' served (by ' + (d.by || '') + ')',
+        };
+        var icons = { ready: 'success', served: 'info' };
+        toast(msgs[d.action] || 'Kitchen update', icons[d.action] || 'info');
+    });
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // table-changed  (admin added / edited / deleted / status / transferred)
+    // ══════════════════════════════════════════════════════════════════════════
+    channel.bind('table-changed', function (d) {
+        var msgs = {
+            added:          '🪑 Table ' + (d.tableNo || '') + ' added by ' + (d.by || ''),
+            updated:        '✏️ Table ' + (d.tableNo || '#' + d.tableID) + ' updated by ' + (d.by || ''),
+            deleted:        '🗑️ Table #' + (d.tableID || '') + ' deleted by ' + (d.by || ''),
+            'status-changed': '🔄 Table #' + (d.tableID || '') + ' status → ' + (d.status || '') + ' (by ' + (d.by || '') + ')',
+            transferred:    '↔️ Order #' + d.orderID + ' transferred to Table ' + (d.newTableNo || d.newTableID || '') + ' by ' + (d.by || ''),
+        };
+        var icons = { added: 'success', updated: 'info', deleted: 'warning', 'status-changed': 'info', transferred: 'info' };
+        toast(msgs[d.action] || 'Table updated', icons[d.action] || 'info');
+    });
+
     // ── Connection status ─────────────────────────────────────────────────────
     pusher.connection.bind('connected',    function () { console.log('[Pusher] Connected ✔'); });
     pusher.connection.bind('disconnected', function () { console.warn('[Pusher] Disconnected'); });

@@ -1,10 +1,10 @@
 <?php
 require_once '../backend/database.php';
 require_once '../backend/pusher.php';
-session_start();
+if (session_status() === PHP_SESSION_NONE) { session_start(); }
 if(!isset($_SESSION['userID'])){ header("Location: ../index.php"); exit(); }
 
-$pageTitle = "My Profile – 7Evelyn POS";
+$pageTitle = "My Profile – Beng's Unli LugawS";
 
 $userID = intval($_SESSION['userID']);
 $stmt = $conn->prepare("SELECT u.*, r.roleName, r.roleDesc FROM users u JOIN role r ON u.roleID=r.roleID WHERE u.userID=?");
@@ -24,11 +24,11 @@ $fullName = trim("{$u['givenName']} {$u['midName']} {$u['surName']} {$u['extName
     border: 1.5px solid var(--mint-dark);
     border-radius: 50px;
     padding: .32rem .8rem .32rem .5rem;
-    font-size: .78rem; color: var(--navy); font-weight: 600;
+    font-size: .78rem; color: var(--charcoal); font-weight: 600;
 }
-.user-badge i { color: var(--navy-light); font-size: 1.1rem; }
+.user-badge i { color: var(--charcoal-light); font-size: 1.1rem; }
 .role-pill {
-    background: var(--navy); color: var(--gold);
+    background: var(--charcoal); color: var(--orange);
     font-size: .68rem; font-weight: 700;
     padding: .15rem .55rem; border-radius: 50px;
     letter-spacing: .04em; text-transform: uppercase;
@@ -43,8 +43,8 @@ $fullName = trim("{$u['givenName']} {$u['midName']} {$u['surName']} {$u['extName
 
 /* ── Hero Banner ────────────────────────────────────────────────────────── */
 .profile-hero {
-    background: var(--navy);
-    border-radius: var(--radius-lg);
+    background: var(--charcoal);
+    border-radius: var(--r-lg);
     padding: 2rem 2.2rem;
     display: flex;
     align-items: center;
@@ -58,7 +58,7 @@ $fullName = trim("{$u['givenName']} {$u['midName']} {$u['surName']} {$u['extName
     position: absolute; right: -60px; top: -60px;
     width: 260px; height: 260px;
     border-radius: 50%;
-    background: rgba(249,217,74,.07);
+    background: rgba(239,130,13,.07);
     pointer-events: none;
 }
 .profile-hero::after {
@@ -78,24 +78,24 @@ $fullName = trim("{$u['givenName']} {$u['midName']} {$u['surName']} {$u['extName
     width: 96px; height: 96px;
     border-radius: 50%;
     object-fit: cover;
-    border: 3px solid var(--gold);
-    box-shadow: 0 0 0 4px rgba(249,217,74,.2);
+    border: 3px solid var(--orange);
+    box-shadow: 0 0 0 4px rgba(239,130,13,.2);
     display: block;
 }
 .avatar-placeholder {
     width: 96px; height: 96px;
     border-radius: 50%;
-    background: var(--navy-mid);
-    border: 3px solid var(--gold);
-    box-shadow: 0 0 0 4px rgba(249,217,74,.2);
+    background: var(--charcoal-mid);
+    border: 3px solid var(--orange);
+    box-shadow: 0 0 0 4px rgba(239,130,13,.2);
     display: flex; align-items: center; justify-content: center;
-    font-size: 2.4rem; color: var(--gold);
+    font-size: 2.4rem; color: var(--orange);
 }
 .avatar-upload-overlay {
     position: absolute; bottom: 2px; right: 2px;
     width: 26px; height: 26px;
-    background: var(--gold);
-    color: var(--navy);
+    background: var(--orange);
+    color: var(--charcoal);
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
     font-size: .75rem;
@@ -112,15 +112,15 @@ $fullName = trim("{$u['givenName']} {$u['midName']} {$u['surName']} {$u['extName
 .hero-info { flex: 1; min-width: 0; }
 .hero-name {
     font-size: 1.4rem; font-weight: 800;
-    color: var(--white); letter-spacing: -.02em;
+    color: var(--c-white); letter-spacing: -.02em;
     margin: 0 0 .4rem;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .hero-role-badge {
     display: inline-flex; align-items: center; gap: .35rem;
-    background: rgba(249,217,74,.15);
-    border: 1px solid rgba(249,217,74,.3);
-    color: var(--gold);
+    background: rgba(239,130,13,.15);
+    border: 1px solid rgba(239,130,13,.3);
+    color: var(--orange);
     font-size: .75rem; font-weight: 700;
     padding: .25rem .75rem;
     border-radius: 50px;
@@ -138,14 +138,14 @@ $fullName = trim("{$u['givenName']} {$u['midName']} {$u['surName']} {$u['extName
     display: flex; align-items: center; gap: .35rem;
     font-size: .78rem; color: rgba(255,255,255,.6);
 }
-.hero-meta-item i { color: var(--gold); font-size: .85rem; }
+.hero-meta-item i { color: var(--orange); font-size: .85rem; }
 
 /* ── Section label ──────────────────────────────────────────────────────── */
 .section-label {
     display: flex; align-items: center; gap: .5rem;
     font-size: .72rem; font-weight: 700;
     letter-spacing: .1em; text-transform: uppercase;
-    color: var(--text-muted);
+    color: var(--t-muted);
     margin-bottom: 1rem;
 }
 .section-label::after {
@@ -155,15 +155,15 @@ $fullName = trim("{$u['givenName']} {$u['midName']} {$u['surName']} {$u['extName
 
 /* ── Cards ──────────────────────────────────────────────────────────────── */
 .p-card {
-    background: var(--white);
-    border-radius: var(--radius-lg);
+    background: var(--c-white);
+    border-radius: var(--r-lg);
     border: 1.5px solid var(--border);
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--sh-sm);
     overflow: hidden;
     transition: var(--transition);
     margin-bottom: 1.4rem;
 }
-.p-card:hover { box-shadow: var(--shadow-md); border-color: #d9d5f0; }
+.p-card:hover { box-shadow: var(--sh-md); border-color: #d9d5f0; }
 .p-card-header {
     display: flex; align-items: center; gap: .7rem;
     padding: 1rem 1.4rem;
@@ -172,46 +172,46 @@ $fullName = trim("{$u['givenName']} {$u['midName']} {$u['surName']} {$u['extName
 }
 .p-card-header .hdr-icon {
     width: 36px; height: 36px;
-    background: var(--gold);
-    border-radius: var(--radius-sm);
+    background: var(--orange);
+    border-radius: var(--r-sm);
     display: flex; align-items: center; justify-content: center;
-    color: var(--navy); font-size: 1.05rem; flex-shrink: 0;
+    color: var(--charcoal); font-size: 1.05rem; flex-shrink: 0;
 }
-.p-card-header .hdr-title { font-size: .92rem; font-weight: 700; color: var(--navy); }
-.p-card-header .hdr-desc { font-size: .74rem; color: var(--text-muted); margin-top: .04rem; }
+.p-card-header .hdr-title { font-size: .92rem; font-weight: 700; color: var(--charcoal); }
+.p-card-header .hdr-desc { font-size: .74rem; color: var(--t-muted); margin-top: .04rem; }
 .p-card-body { padding: 1.5rem 1.4rem; }
 
 /* ── Form Fields ────────────────────────────────────────────────────────── */
 .field-group { margin-bottom: 1rem; }
 .field-group label {
     display: block; font-size: .78rem; font-weight: 700;
-    color: var(--navy); margin-bottom: .32rem;
+    color: var(--charcoal); margin-bottom: .32rem;
 }
 .field-group label .req { color: #d93025; }
 .field-group .form-control,
 .field-group .form-select {
     border: 1.5px solid var(--border);
-    border-radius: var(--radius-sm);
+    border-radius: var(--r-sm);
     padding: .56rem .82rem;
     font-size: .84rem;
     color: var(--text-main);
-    background: var(--white);
+    background: var(--c-white);
     transition: var(--transition);
     box-shadow: none;
 }
 .field-group .form-control:focus,
 .field-group .form-select:focus {
-    border-color: var(--gold-dark);
-    box-shadow: 0 0 0 3px rgba(249,217,74,.18);
+    border-color: var(--orange-dark);
+    box-shadow: 0 0 0 3px rgba(239,130,13,.18);
     outline: none;
 }
 .field-group .form-control:disabled,
 .field-group .form-control[disabled] {
     background: var(--mint);
-    color: var(--text-muted);
+    color: var(--t-muted);
     cursor: not-allowed;
 }
-.field-group .field-hint { font-size: .72rem; color: var(--text-muted); margin-top: .28rem; }
+.field-group .field-hint { font-size: .72rem; color: var(--t-muted); margin-top: .28rem; }
 .field-row { display: grid; gap: 1rem; }
 .field-row-2 { grid-template-columns: 1fr 1fr; }
 .field-row-3 { grid-template-columns: 1fr 1fr 1fr; }
@@ -222,9 +222,9 @@ $fullName = trim("{$u['givenName']} {$u['midName']} {$u['surName']} {$u['extName
 
 /* ── Buttons ────────────────────────────────────────────────────────────── */
 .btn-gold {
-    background: var(--gold); color: var(--navy);
-    border: 1.5px solid var(--gold-dark);
-    border-radius: var(--radius-sm);
+    background: var(--orange); color: var(--charcoal);
+    border: 1.5px solid var(--orange-dark);
+    border-radius: var(--r-sm);
     font-size: .83rem; font-weight: 700;
     padding: .58rem 1.3rem;
     transition: var(--transition);
@@ -232,14 +232,14 @@ $fullName = trim("{$u['givenName']} {$u['midName']} {$u['surName']} {$u['extName
     cursor: pointer; letter-spacing: -.01em;
 }
 .btn-gold:hover {
-    background: var(--gold-dark); color: var(--navy);
-    box-shadow: 0 4px 14px rgba(249,217,74,.38);
+    background: var(--orange-dark); color: var(--charcoal);
+    box-shadow: 0 4px 14px rgba(239,130,13,.38);
     transform: translateY(-1px);
 }
 .btn-navy {
-    background: var(--navy); color: var(--gold);
-    border: 1.5px solid var(--navy-mid);
-    border-radius: var(--radius-sm);
+    background: var(--charcoal); color: var(--orange);
+    border: 1.5px solid var(--charcoal-mid);
+    border-radius: var(--r-sm);
     font-size: .83rem; font-weight: 700;
     padding: .58rem 1.3rem;
     transition: var(--transition);
@@ -247,36 +247,36 @@ $fullName = trim("{$u['givenName']} {$u['midName']} {$u['surName']} {$u['extName
     cursor: pointer; width: 100%; justify-content: center;
 }
 .btn-navy:hover {
-    background: var(--navy-mid); color: var(--gold);
-    box-shadow: 0 4px 14px rgba(38,35,65,.22);
+    background: var(--charcoal-mid); color: var(--orange);
+    box-shadow: 0 4px 14px rgba(26,26,26,.22);
     transform: translateY(-1px);
 }
 
 /* ── Role & Access Card ─────────────────────────────────────────────────── */
 .role-banner {
     display: flex; align-items: center; gap: 1rem;
-    background: var(--navy);
-    border-radius: var(--radius-md);
+    background: var(--charcoal);
+    border-radius: var(--r-md);
     padding: 1rem 1.2rem;
     margin-bottom: 1.1rem;
 }
 .role-banner-icon {
     width: 44px; height: 44px;
-    background: rgba(249,217,74,.15);
-    border: 1.5px solid rgba(249,217,74,.3);
-    border-radius: var(--radius-sm);
+    background: rgba(239,130,13,.15);
+    border: 1.5px solid rgba(239,130,13,.3);
+    border-radius: var(--r-sm);
     display: flex; align-items: center; justify-content: center;
-    font-size: 1.3rem; color: var(--gold); flex-shrink: 0;
+    font-size: 1.3rem; color: var(--orange); flex-shrink: 0;
 }
-.role-banner-title { font-weight: 700; color: var(--white); font-size: .9rem; }
+.role-banner-title { font-weight: 700; color: var(--c-white); font-size: .9rem; }
 .role-banner-desc  { font-size: .74rem; color: rgba(255,255,255,.55); margin-top: .1rem; }
 
 .info-table { width: 100%; border-collapse: collapse; }
 .info-table tr { border-bottom: 1px solid var(--border); }
 .info-table tr:last-child { border-bottom: none; }
 .info-table td { padding: .6rem .15rem; font-size: .82rem; vertical-align: middle; }
-.info-table td:first-child { color: var(--text-muted); width: 110px; font-weight: 500; }
-.info-table td:last-child { font-weight: 600; color: var(--navy); }
+.info-table td:first-child { color: var(--t-muted); width: 110px; font-weight: 500; }
+.info-table td:last-child { font-weight: 600; color: var(--charcoal); }
 .status-active {
     display: inline-flex; align-items: center; gap: .35rem;
     background: #e6f9f0; color: #1a7a4a;
@@ -298,7 +298,7 @@ $fullName = trim("{$u['givenName']} {$u['midName']} {$u['surName']} {$u['extName
     background: none; border: none; padding: 0;
     transition: color .15s;
 }
-.pw-toggle:hover { color: var(--navy); }
+.pw-toggle:hover { color: var(--charcoal); }
 
 /* ── Grid layout ────────────────────────────────────────────────────────── */
 .profile-grid {
@@ -459,7 +459,7 @@ foreach($alerts as $k=>[$i,$t,$tx])
             <div class="section-label"><i class="bi bi-shield-check"></i> Role & Access</div>
             <div class="p-card">
                 <div class="p-card-header">
-                    <div class="hdr-icon" style="background:var(--mint-dark);color:var(--navy-mid);"><i class="bi bi-shield-check"></i></div>
+                    <div class="hdr-icon" style="background:var(--mint-dark);color:var(--charcoal-mid);"><i class="bi bi-shield-check"></i></div>
                     <div>
                         <div class="hdr-title">Role & Access</div>
                         <div class="hdr-desc">Your permissions in the system</div>
@@ -570,4 +570,5 @@ function togglePw(id, btn){
 }
 </script>
 
-<?php include 'footer.php' ?? null; ?>
+<?php include 'footer.php'; ?>
+</body></html>

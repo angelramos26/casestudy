@@ -1,10 +1,10 @@
 <?php
 require_once '../backend/database.php';
 require_once '../backend/pusher.php';
-session_start();
+if (session_status() === PHP_SESSION_NONE) { session_start(); }
 if(!isset($_SESSION['userID'])){ header("Location: ../index.php"); exit(); }
 if(!in_array($_SESSION['roleName'], ['Admin','Owner','Cashier'])){ header("Location: dashboard.php"); exit(); }
-$pageTitle = "Inventory – 7Evelyn POS";
+$pageTitle = "Inventory – Beng's Unli Lugaw";
 $suppliers = $conn->query("SELECT supplierID, companyName FROM supplier WHERE dateDeleted IS NULL ORDER BY companyName");
 ?>
 <?php include 'header.php'; ?>
@@ -41,18 +41,18 @@ $suppliers = $conn->query("SELECT supplierID, companyName FROM supplier WHERE da
 .btn-out:hover { background: rgba(224,82,82,.18); color: var(--col-danger); transform: translateY(-1px); }
 
 .btn-adj {
-  background: var(--col-navy-10); color: var(--col-navy); border: 1.5px solid rgba(38,35,65,.15);
+  background: var(--col-navy-10); color: var(--col-navy); border: 1.5px solid rgba(26,26,26,.15);
   font-weight: 700; border-radius: var(--radius-pill); padding: 8px 18px;
   font-size: .87rem; display: inline-flex; align-items: center; gap: 6px;
   transition: background .15s, transform .14s;
 }
-.btn-adj:hover { background: rgba(38,35,65,.13); color: var(--col-navy); transform: translateY(-1px); }
+.btn-adj:hover { background: rgba(26,26,26,.13); color: var(--col-navy); transform: translateY(-1px); }
 
 .btn-secondary {
   background: var(--col-navy-10); color: var(--col-navy); border: none;
   border-radius: var(--radius-pill); font-weight: 600; font-size: .87rem; padding: 9px 20px;
 }
-.btn-secondary:hover { background: rgba(38,35,65,.14); color: var(--col-navy); }
+.btn-secondary:hover { background: rgba(26,26,26,.14); color: var(--col-navy); }
 .btn-danger-ev  { background: var(--col-danger);  color: #fff; border: none; border-radius: var(--radius-pill); font-weight: 700; font-size: .87rem; padding: 9px 22px; }
 .btn-neutral-ev { background: var(--col-navy);    color: #fff; border: none; border-radius: var(--radius-pill); font-weight: 700; font-size: .87rem; padding: 9px 22px; }
 
@@ -70,7 +70,7 @@ $suppliers = $conn->query("SELECT supplierID, companyName FROM supplier WHERE da
 .table-ev tbody tr:nth-child(even) { background: var(--col-mint); }
 .table-ev tbody tr:hover { background: var(--col-yellow-30); }
 .table-ev tbody td {
-  padding: 11px 14px; border-bottom: 1px solid rgba(38,35,65,.06);
+  padding: 11px 14px; border-bottom: 1px solid rgba(26,26,26,.06);
   vertical-align: middle; color: var(--col-navy);
 }
 
@@ -79,7 +79,7 @@ $suppliers = $conn->query("SELECT supplierID, companyName FROM supplier WHERE da
 .badge-active   { background: rgba(45,190,138,.14);  color: var(--col-success); }
 .badge-inactive { background: rgba(224,82,82,.12);   color: var(--col-danger);  }
 .badge-low      { background: rgba(240,168,71,.15);  color: var(--col-warning); }
-.badge-pending  { background: rgba(38,35,65,.10);    color: var(--col-navy);    }
+.badge-pending  { background: rgba(26,26,26,.10);    color: var(--col-navy);    }
 
 .expiry-expired { color: var(--col-danger);  font-weight: 700; }
 .expiry-soon    { color: var(--col-warning); font-weight: 700; }
@@ -87,10 +87,10 @@ $suppliers = $conn->query("SELECT supplierID, companyName FROM supplier WHERE da
 /* type badge overrides */
 .type-in   { background: rgba(45,190,138,.14);  color: var(--col-success); }
 .type-out  { background: rgba(224,82,82,.12);   color: var(--col-danger);  }
-.type-adj  { background: rgba(38,35,65,.10);    color: var(--col-navy);    }
+.type-adj  { background: rgba(26,26,26,.10);    color: var(--col-navy);    }
 
 /* ── MODAL ───────────────────────────────────────────────────── */
-.modal-content { border: none; border-radius: var(--radius-card); overflow: hidden; box-shadow: 0 24px 64px rgba(38,35,65,.22); }
+.modal-content { border: none; border-radius: var(--radius-card); overflow: hidden; box-shadow: 0 24px 64px rgba(26,26,26,.22); }
 .modal-header-ev      { background: var(--col-navy); color: #fff; padding: 18px 24px; border: none; }
 .modal-header-danger  { background: var(--col-danger);  color: #fff; padding: 18px 24px; border: none; }
 .modal-header-neutral { background: var(--col-navy-80); color: #fff; padding: 18px 24px; border: none; }
@@ -99,7 +99,7 @@ $suppliers = $conn->query("SELECT supplierID, companyName FROM supplier WHERE da
 .modal-header-danger .modal-title i,
 .modal-header-neutral .modal-title i { color: rgba(255,255,255,.75); }
 .modal-body   { padding: 24px; }
-.modal-footer { padding: 14px 24px; border-top: 1px solid rgba(38,35,65,.07); background: #fafafa; }
+.modal-footer { padding: 14px 24px; border-top: 1px solid rgba(26,26,26,.07); background: #fafafa; }
 
 .form-label { font-size: .78rem; font-weight: 700; color: var(--col-navy); letter-spacing: .03em; text-transform: uppercase; margin-bottom: 5px; }
 .form-control, .form-select { border-radius: 10px; border: 1.5px solid #ddd; font-size: .875rem; padding: 9px 13px; color: var(--col-navy); transition: border-color .15s, box-shadow .15s; }
@@ -333,4 +333,5 @@ $(document).ready(function(){
     const PUSHER_CLUSTER = '<?php echo defined("PUSHER_APP_CLUSTER") ? PUSHER_APP_CLUSTER : ""; ?>';
 </script>
 <script src="pusher-content/realtime.js"></script>
+<?php include 'footer.php'; ?>
 </body></html>

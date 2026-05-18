@@ -2,10 +2,10 @@
 require_once '../backend/database.php';
 require_once '../backend/pusher.php';
 
-session_start();
+if (session_status() === PHP_SESSION_NONE) { session_start(); }
 if(!isset($_SESSION['userID'])){ header("Location: ../index.php"); exit(); }
 if(!in_array($_SESSION['roleName'], ['Admin','Owner'])){ header("Location: dashboard.php"); exit(); }
-$pageTitle = "Expenses – 7Evelyn POS";
+$pageTitle = "Expenses – Beng's Unli Lugaw";
 $categories = $conn->query("SELECT * FROM expense_category ORDER BY categoryName");
 
 // Summary stats
@@ -17,169 +17,169 @@ $totalToday = $conn->query("SELECT COALESCE(SUM(amount),0) AS t FROM expense WHE
 
 <style>
 /* ── Body ── */
-.ex-body { padding: 24px 28px; background: var(--ice); min-height: calc(100vh - 52px); }
+.ex-body { padding: 24px 28px; background: var(--s-bg); min-height: calc(100vh - 52px); }
 
 /* ── Stats ── */
 .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
 @media(max-width:900px){ .stats-row { grid-template-columns: repeat(2,1fr); } }
 
 .stat-tile {
-    background: var(--white); border-radius: var(--radius-md);
-    padding: 18px 20px; box-shadow: var(--shadow-sm);
-    border: 1px solid var(--ice-dark);
+    background: var(--c-white); border-radius: var(--r-md);
+    padding: 18px 20px; box-shadow: var(--sh-sm);
+    border: 1px solid var(--s-border);
     display: flex; align-items: center; gap: 14px;
     transition: box-shadow .2s, transform .2s;
 }
-.stat-tile:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+.stat-tile:hover { box-shadow: var(--sh-md); transform: translateY(-2px); }
 .icon-wrap {
     width: 48px; height: 48px; border-radius: 14px;
     display: flex; align-items: center; justify-content: center;
     font-size: 1.35rem; flex-shrink: 0;
 }
-.icon-wrap.navy   { background: var(--navy);    color: var(--gold); }
+.icon-wrap.navy   { background: var(--charcoal);    color: var(--orange); }
 .icon-wrap.warn   { background: #fef3e2;         color: var(--warn); }
-.icon-wrap.danger { background: #fde8ea;         color: var(--danger); }
-.icon-wrap.ice    { background: var(--ice-dark); color: var(--navy-light); }
+.icon-wrap.danger { background: #fde8ea;         color: var(--c-danger); }
+.icon-wrap.ice    { background: var(--s-border); color: var(--charcoal-light); }
 
-.stat-val { font-size: 1.2rem; font-weight: 900; color: var(--text-dark); line-height: 1.2; }
-.stat-lbl { font-size: 11.5px; color: var(--text-muted); font-weight: 600; margin-top: 2px; }
+.stat-val { font-size: 1.2rem; font-weight: 900; color: var(--t-main); line-height: 1.2; }
+.stat-lbl { font-size: 11.5px; color: var(--t-muted); font-weight: 600; margin-top: 2px; }
 
 /* ── Page header ── */
 .page-header {
     display: flex; align-items: center; justify-content: space-between;
     margin-bottom: 18px;
 }
-.page-header h5 { margin: 0; font-size: 1.05rem; font-weight: 900; color: var(--text-dark); display: flex; align-items: center; gap: 8px; }
-.page-header h5 i { color: var(--navy-light); }
+.page-header h5 { margin: 0; font-size: 1.05rem; font-weight: 900; color: var(--t-main); display: flex; align-items: center; gap: 8px; }
+.page-header h5 i { color: var(--charcoal-light); }
 .header-actions { display: flex; gap: 8px; }
 
 .btn-primary-act {
-    background: var(--navy); color: var(--gold);
-    border: none; border-radius: var(--radius-sm);
+    background: var(--charcoal); color: var(--orange);
+    border: none; border-radius: var(--r-sm);
     padding: 9px 18px; font-size: 13px; font-weight: 800;
     cursor: pointer; transition: all .2s;
     display: inline-flex; align-items: center; gap: 6px;
-    box-shadow: 0 3px 12px rgba(38,35,65,.15);
+    box-shadow: 0 3px 12px rgba(26,26,26,.15);
 }
-.btn-primary-act:hover { background: var(--navy-mid); }
+.btn-primary-act:hover { background: var(--charcoal-mid); }
 
 .btn-secondary-act {
-    background: var(--white); color: var(--text-mid);
-    border: 1.5px solid var(--ice-dark); border-radius: var(--radius-sm);
+    background: var(--c-white); color: var(--t-mid);
+    border: 1.5px solid var(--s-border); border-radius: var(--r-sm);
     padding: 8px 16px; font-size: 13px; font-weight: 700;
     cursor: pointer; transition: all .2s;
     display: inline-flex; align-items: center; gap: 6px;
 }
-.btn-secondary-act:hover { border-color: var(--navy); color: var(--navy); }
+.btn-secondary-act:hover { border-color: var(--charcoal); color: var(--charcoal); }
 
 /* ── Filter card ── */
 .filter-card {
-    background: var(--white); border-radius: var(--radius-md);
-    box-shadow: var(--shadow-sm); border: 1px solid var(--ice-dark);
+    background: var(--c-white); border-radius: var(--r-md);
+    box-shadow: var(--sh-sm); border: 1px solid var(--s-border);
     padding: 16px 20px; margin-bottom: 18px;
 }
-.filter-card .fc-title { font-size: 11px; font-weight: 800; letter-spacing: 1px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
-.form-label-sm { font-size: 12px; font-weight: 700; color: var(--text-mid); margin-bottom: 4px; display: block; }
+.filter-card .fc-title { font-size: 11px; font-weight: 800; letter-spacing: 1px; color: var(--t-muted); text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+.form-label-sm { font-size: 12px; font-weight: 700; color: var(--t-mid); margin-bottom: 4px; display: block; }
 .form-field {
     width: 100%; padding: 8px 12px;
-    border: 1.5px solid var(--ice-dark); border-radius: var(--radius-sm);
-    font-size: 13px; color: var(--text-dark); background: var(--ice);
+    border: 1.5px solid var(--s-border); border-radius: var(--r-sm);
+    font-size: 13px; color: var(--t-main); background: var(--s-bg);
     outline: none; transition: border-color .2s;
 }
-.form-field:focus { border-color: var(--navy); background: var(--white); box-shadow: none; }
+.form-field:focus { border-color: var(--charcoal); background: var(--c-white); box-shadow: none; }
 
 .btn-filter {
-    background: var(--navy); color: var(--gold);
-    border: none; border-radius: var(--radius-sm);
+    background: var(--charcoal); color: var(--orange);
+    border: none; border-radius: var(--r-sm);
     padding: 8px 20px; font-size: 13px; font-weight: 700;
     cursor: pointer; transition: all .2s;
     display: inline-flex; align-items: center; gap: 6px; width: 100%;
     justify-content: center;
 }
-.btn-filter:hover { background: var(--navy-mid); }
+.btn-filter:hover { background: var(--charcoal-mid); }
 
 /* ── Table card ── */
-.table-card { background: var(--white); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); border: 1px solid var(--ice-dark); overflow: hidden; }
+.table-card { background: var(--c-white); border-radius: var(--r-md); box-shadow: var(--sh-sm); border: 1px solid var(--s-border); overflow: hidden; }
 .table-card-head {
-    padding: 14px 20px; border-bottom: 1px solid var(--ice-dark);
+    padding: 14px 20px; border-bottom: 1px solid var(--s-border);
     display: flex; align-items: center; justify-content: space-between;
-    background: #fafbff;
+    background: #FFF8F0;
 }
-.table-card-head .tc-title { font-size: 13px; font-weight: 800; color: var(--text-dark); display: flex; align-items: center; gap: 7px; }
-.table-card-head .tc-title i { color: var(--navy-light); }
-.tc-total { font-size: 14px; font-weight: 900; color: var(--danger); }
+.table-card-head .tc-title { font-size: 13px; font-weight: 800; color: var(--t-main); display: flex; align-items: center; gap: 7px; }
+.table-card-head .tc-title i { color: var(--charcoal-light); }
+.tc-total { font-size: 14px; font-weight: 900; color: var(--c-danger); }
 
 .table-wrap { padding: 16px 20px; overflow-x: auto; }
 
 table#expenseTable { width: 100%; border-collapse: collapse; }
 table#expenseTable thead tr th {
-    background: var(--navy); color: var(--gold);
+    background: var(--charcoal); color: var(--orange);
     font-size: 11px; font-weight: 800; letter-spacing: .6px;
     text-transform: uppercase; padding: 11px 14px;
     white-space: nowrap; border: none;
 }
 table#expenseTable tbody tr { transition: background .12s; }
 table#expenseTable tbody tr:hover { background: #f5f8ff; }
-table#expenseTable tbody tr:nth-child(even) { background: #fafbff; }
+table#expenseTable tbody tr:nth-child(even) { background: #FFF8F0; }
 table#expenseTable tbody tr:nth-child(even):hover { background: #f0f4ff; }
 table#expenseTable tbody td {
-    padding: 10px 14px; font-size: 12.5px; color: var(--text-dark);
-    border-bottom: 1px solid var(--ice); vertical-align: middle;
+    padding: 10px 14px; font-size: 12.5px; color: var(--t-main);
+    border-bottom: 1px solid var(--s-bg); vertical-align: middle;
 }
 table#expenseTable tfoot td {
     padding: 10px 14px; font-size: 13px; font-weight: 800;
-    color: var(--navy); background: #f0f4ff;
-    border-top: 2px solid var(--ice-dark);
+    color: var(--charcoal); background: #f0f4ff;
+    border-top: 2px solid var(--s-border);
 }
 
-.date-cell { font-size: 12px; white-space: nowrap; color: var(--text-mid); }
+.date-cell { font-size: 12px; white-space: nowrap; color: var(--t-mid); }
 .cat-badge {
     display: inline-flex; align-items: center; gap: 5px;
     padding: 3px 10px; border-radius: 20px;
     font-size: 11px; font-weight: 800; letter-spacing: .3px;
-    background: #eae6ff; color: var(--navy-light);
+    background: #eae6ff; color: var(--charcoal-light);
 }
-.desc-cell { color: var(--text-dark); font-size: 12.5px; }
-.amount-cell { font-size: 13.5px; font-weight: 900; color: var(--danger); white-space: nowrap; }
-.user-cell { color: var(--text-muted); font-size: 12px; }
+.desc-cell { color: var(--t-main); font-size: 12.5px; }
+.amount-cell { font-size: 13.5px; font-weight: 900; color: var(--c-danger); white-space: nowrap; }
+.user-cell { color: var(--t-muted); font-size: 12px; }
 
 .btn-del {
-    background: #fde8ea; color: var(--danger);
-    border: 1.5px solid #f7c0c6; border-radius: var(--radius-sm);
+    background: #fde8ea; color: var(--c-danger);
+    border: 1.5px solid #f7c0c6; border-radius: var(--r-sm);
     width: 30px; height: 30px;
     display: inline-flex; align-items: center; justify-content: center;
     font-size: 13px; cursor: pointer; transition: all .15s;
 }
-.btn-del:hover { background: var(--danger); color: #fff; border-color: var(--danger); }
+.btn-del:hover { background: var(--c-danger); color: #fff; border-color: var(--c-danger); }
 
 /* DataTables overrides */
 .dataTables_wrapper .dataTables_filter input,
 .dataTables_wrapper .dataTables_length select {
-    border: 1.5px solid var(--ice-dark) !important; border-radius: var(--radius-sm) !important;
+    border: 1.5px solid var(--s-border) !important; border-radius: var(--r-sm) !important;
     padding: 5px 10px !important; font-size: 12.5px !important; outline: none !important;
-    background: var(--ice) !important; color: var(--text-dark) !important;
+    background: var(--s-bg) !important; color: var(--t-main) !important;
 }
 .dataTables_wrapper .dataTables_filter input:focus,
-.dataTables_wrapper .dataTables_length select:focus { border-color: var(--navy) !important; background: var(--white) !important; box-shadow: none !important; }
+.dataTables_wrapper .dataTables_length select:focus { border-color: var(--charcoal) !important; background: var(--c-white) !important; box-shadow: none !important; }
 .dataTables_wrapper .dataTables_filter label,
 .dataTables_wrapper .dataTables_length label,
-.dataTables_wrapper .dataTables_info { font-size: 12px; color: var(--text-muted); }
-.dataTables_wrapper .dataTables_paginate .paginate_button { border-radius: var(--radius-sm) !important; font-size: 12px !important; color: var(--text-mid) !important; }
+.dataTables_wrapper .dataTables_info { font-size: 12px; color: var(--t-muted); }
+.dataTables_wrapper .dataTables_paginate .paginate_button { border-radius: var(--r-sm) !important; font-size: 12px !important; color: var(--t-mid) !important; }
 .dataTables_wrapper .dataTables_paginate .paginate_button.current,
-.dataTables_wrapper .dataTables_paginate .paginate_button.current:hover { background: var(--navy) !important; color: var(--gold) !important; border-color: var(--navy) !important; }
-.dataTables_wrapper .dataTables_paginate .paginate_button:hover { background: var(--ice) !important; color: var(--navy) !important; border-color: var(--ice-dark) !important; }
+.dataTables_wrapper .dataTables_paginate .paginate_button.current:hover { background: var(--charcoal) !important; color: var(--orange) !important; border-color: var(--charcoal) !important; }
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover { background: var(--s-bg) !important; color: var(--charcoal) !important; border-color: var(--s-border) !important; }
 
 /* ── Modals ── */
-.modal-navy .modal-header { background: var(--navy); color: var(--white); border: none; }
+.modal-navy .modal-header { background: var(--charcoal); color: var(--c-white); border: none; }
 .modal-navy .modal-title  { font-weight: 800; }
-.modal-navy .modal-title i { color: var(--gold); }
+.modal-navy .modal-title i { color: var(--orange); }
 .modal-navy .modal-content { border: none; border-radius: 16px; overflow: hidden; }
 .modal-navy .btn-close-white { filter: brightness(0) invert(1); opacity: .7; }
 
-.btn-save { background: var(--navy); color: var(--gold); border: none; border-radius: var(--radius-sm); padding: 9px 22px; font-size: 13px; font-weight: 800; cursor: pointer; transition: all .2s; }
-.btn-save:hover { background: var(--navy-mid); }
-.btn-cancel { background: var(--ice); color: var(--text-mid); border: 1.5px solid var(--ice-dark); border-radius: var(--radius-sm); padding: 8px 18px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all .2s; }
-.btn-cancel:hover { background: var(--ice-dark); }
+.btn-save { background: var(--charcoal); color: var(--orange); border: none; border-radius: var(--r-sm); padding: 9px 22px; font-size: 13px; font-weight: 800; cursor: pointer; transition: all .2s; }
+.btn-save:hover { background: var(--charcoal-mid); }
+.btn-cancel { background: var(--s-bg); color: var(--t-mid); border: 1.5px solid var(--s-border); border-radius: var(--r-sm); padding: 8px 18px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all .2s; }
+.btn-cancel:hover { background: var(--s-border); }
 </style>
 
 <?php
@@ -341,8 +341,8 @@ include 'topbar.php';
                 </tbody>
                 <tfoot>
                     <tr>
-                        <td colspan="3" style="text-align:right;font-weight:800;color:var(--text-mid);">Period Total</td>
-                        <td style="color:var(--danger);font-size:14px;font-weight:900;">₱<?php echo number_format($grandTotal, 2); ?></td>
+                        <td colspan="3" style="text-align:right;font-weight:800;color:var(--t-mid);">Period Total</td>
+                        <td style="color:var(--c-danger);font-size:14px;font-weight:900;">₱<?php echo number_format($grandTotal, 2); ?></td>
                         <td colspan="2"></td>
                     </tr>
                 </tfoot>
@@ -363,10 +363,10 @@ include 'topbar.php';
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body" style="padding:20px 24px;">
-                    <label class="form-label-sm">Category Name <span style="color:var(--danger);">*</span></label>
+                    <label class="form-label-sm">Category Name <span style="color:var(--c-danger);">*</span></label>
                     <input type="text" name="categoryName" class="form-field" required placeholder="e.g. Utilities, Rent…">
                 </div>
-                <div class="modal-footer" style="border-top:1px solid var(--ice-dark);padding:12px 24px;gap:8px;">
+                <div class="modal-footer" style="border-top:1px solid var(--s-border);padding:12px 24px;gap:8px;">
                     <button type="button" class="btn-cancel" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" name="addExpenseCategory" class="btn-save">Save Category</button>
                 </div>
@@ -388,7 +388,7 @@ include 'topbar.php';
                 </div>
                 <div class="modal-body" style="padding:20px 24px;">
                     <div class="mb-3">
-                        <label class="form-label-sm">Category <span style="color:var(--danger);">*</span></label>
+                        <label class="form-label-sm">Category <span style="color:var(--c-danger);">*</span></label>
                         <select name="expenseCategoryID" class="form-field" style="cursor:pointer;" required>
                             <option value="">— Select Category —</option>
                             <?php $categories->data_seek(0); while($c = $categories->fetch_assoc()): ?>
@@ -397,7 +397,7 @@ include 'topbar.php';
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label-sm">Amount (₱) <span style="color:var(--danger);">*</span></label>
+                        <label class="form-label-sm">Amount (₱) <span style="color:var(--c-danger);">*</span></label>
                         <input type="number" name="amount" step="0.01" min="0.01" class="form-field" required placeholder="0.00">
                     </div>
                     <div class="mb-3">
@@ -405,11 +405,11 @@ include 'topbar.php';
                         <input type="text" name="description" class="form-field" placeholder="What was this expense for?">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label-sm">Date <span style="color:var(--danger);">*</span></label>
+                        <label class="form-label-sm">Date <span style="color:var(--c-danger);">*</span></label>
                         <input type="date" name="expense_date" class="form-field" value="<?php echo date('Y-m-d'); ?>" required>
                     </div>
                 </div>
-                <div class="modal-footer" style="border-top:1px solid var(--ice-dark);padding:12px 24px;gap:8px;">
+                <div class="modal-footer" style="border-top:1px solid var(--s-border);padding:12px 24px;gap:8px;">
                     <button type="button" class="btn-cancel" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" name="expenseSave" class="btn-save">
                         <i class="bi bi-plus-circle me-1"></i>Save Expense
@@ -444,4 +444,5 @@ $(document).ready(function(){
     const PUSHER_CLUSTER = '<?php echo defined("PUSHER_APP_CLUSTER") ? PUSHER_APP_CLUSTER : ""; ?>';
 </script>
 <script src="pusher-content/realtime.js"></script>
+<?php include 'footer.php'; ?>
 </body></html>

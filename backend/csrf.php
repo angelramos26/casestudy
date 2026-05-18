@@ -1,32 +1,14 @@
 <?php
 /**
  * csrf.php — CSRF Token Helpers
- *
- * Usage (backend — validate before processing POST):
- *   require_once 'csrf.php';
- *   csrf_verify();          // dies with 403 if token is missing/invalid
- *
- * Usage (frontend — emit a hidden input inside every <form>):
- *   <?php require_once '../backend/csrf.php'; ?>
- *   <form method="POST" action="...">
- *       <?php csrf_field(); ?>
- *       ...
- *   </form>
- *
- * Usage (JavaScript fetch / FormData — append the token):
- *   formData.append('csrf_token', '<?= csrf_token() ?>');
- *
- * Token lifetime: per-session, regenerated on login/logout.
+ * Robust version: always ensures session is active before touching tokens.
  */
 
-// Ensure session is active before any CSRF functions are called.
 if (session_status() === PHP_SESSION_NONE) {
+    ini_set('session.cookie_samesite', 'Lax');
     session_start();
 }
 
-/**
- * Return (and lazily create) the session CSRF token.
- */
 function csrf_token(): string
 {
     if (empty($_SESSION['csrf_token'])) {
@@ -35,10 +17,6 @@ function csrf_token(): string
     return $_SESSION['csrf_token'];
 }
 
-/**
- * Echo a hidden <input> field carrying the CSRF token.
- * Call this inside every HTML <form>.
- */
 function csrf_field(): void
 {
     echo '<input type="hidden" name="csrf_token" value="'
@@ -46,22 +24,22 @@ function csrf_field(): void
         . '">';
 }
 
-/**
- * Verify the CSRF token submitted with the current POST request.
- * Sends HTTP 403 and exits if the token is absent or wrong.
- *
- * @param bool $json  When true, responds with JSON (for AJAX endpoints).
- */
 function csrf_verify(bool $json = false): void
 {
-    $submitted = $_POST['csrf_token'] ?? '';
+    // Ensure session is active
+    if (session_status() === PHP_SESSION_NONE) {
+        ini_set('session.cookie_samesite', 'Lax');
+        session_start();
+    }
+
+    $submitted = $_POST['csrf_token'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
     $expected  = $_SESSION['csrf_token'] ?? '';
 
     if (!$expected || !hash_equals($expected, $submitted)) {
         http_response_code(403);
         if ($json) {
             header('Content-Type: application/json');
-            echo json_encode(['success' => false, 'message' => 'Invalid CSRF token. Please refresh the page and try again.']);
+            echo json_encode(['success' => false, 'message' => 'Session expired. Please refresh the page and try again.']);
         } else {
             echo '<p style="font-family:sans-serif;color:#b0192a;padding:2rem;">
                     <strong>403 – CSRF token mismatch.</strong><br>
@@ -72,9 +50,6 @@ function csrf_verify(bool $json = false): void
     }
 }
 
-/**
- * Regenerate the token (call after successful login or logout).
- */
 function csrf_regenerate(): void
 {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
